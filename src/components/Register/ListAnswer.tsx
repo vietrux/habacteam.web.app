@@ -1,8 +1,8 @@
-import { db } from "../../../fireConfig";
+import { db } from "../../fireConfig";
 import { collection, getDocs } from "firebase/firestore";
 import { useState, useEffect } from "react";
-import useDocumentTitle from "../../OtherFunc/useDocumentTitle";
-export default function ListUser() {
+import useDocumentTitle from "../OtherFunc/useDocumentTitle";
+export default function ListAnswer() {
 
   type FormDataObject = {
     time: number;
