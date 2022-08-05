@@ -1,12 +1,15 @@
 import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, User } from "firebase/auth";
-import { collection, doc, query, onSnapshot, updateDoc } from "firebase/firestore";
+import { collection, doc, query, getDoc, onSnapshot, updateDoc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../../fireConfig";
 import { useState } from "react";
+import useDocumentTitle from "../OtherFunc/useDocumentTitle";
+import axios from "axios";
 
 type Value = {
   id: string;
   status: boolean;
   errormessage: string;
+  errorcode: number;
 }
 
 type ModalProps = {
@@ -17,29 +20,35 @@ type ModalProps = {
     uid: string;
     status: boolean;
     errormessage: string;
+    errorcode: number;
+    postid: string;
   }
   function: Function;
   value: Value;
+  isPending: boolean;
 }
 
 function Modal(props: ModalProps) {
   const [showModal, setShowModal] = useState(false);
-  const [index, setIndex] = useState("");
+  const [index, setIndex] = useState(props.value.errorcode);
   const listoption = [
     {
       id: props.value.id,
       status: false,
-      errormessage: null
+      errormessage: null,
+      errorcode: 0,
     },
     {
       id: props.value.id,
       status: true,
-      errormessage: null
+      errormessage: null,
+      errorcode: 1,
     },
     {
       id: props.value.id,
       status: false,
-      errormessage: "Vi phạm"
+      errormessage: "Vi phạm",
+      errorcode: 2,
     }
   ]
   return (
@@ -49,7 +58,6 @@ function Modal(props: ModalProps) {
           <p>{props.data.time}</p>
           <p>{props.data.errormessage ? "Vi phạm" : props.data.status ? "Đã xác nhận" : "Chưa xác nhận"}</p>
         </div>
-        <img src="https://picsum.photos/300/150" className="w-full h-auto" alt="lorem picsum" />
         <p style={
           {
             overflow: "hidden",
@@ -80,7 +88,7 @@ function Modal(props: ModalProps) {
               {/*content*/}
               <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
                 {/*header*/}
-                <div className="flex items-start justify-between p-5 border-b border-solid border-slate-300 rounded-t">
+                <div className="flex items-center justify-between p-5 border-b border-solid border-slate-300 rounded-t">
                   <h3 className="text-xl font-semibold">
                     {props.data.errormessage ? "Vi phạm" : props.data.status ? "Đã xác nhận" : "Chưa xác nhận"}
                   </h3>
@@ -95,31 +103,44 @@ function Modal(props: ModalProps) {
                 </div>
                 {/*body*/}
                 <div className="relative p-3 flex-auto">
-                  <p style={{whiteSpace: "pre-line"}} className="h-36 my-1 text-slate-500 text-lg leading-relaxed overflow-y-auto scrollbar">
+                  <p style={{ whiteSpace: "pre-line" }} className="h-36 my-1 text-slate-500 text-lg leading-relaxed overflow-y-auto scrollbar">
                     {props.data.content}
                   </p>
                 </div>
                 {/*footer*/}
-                <div className="flex items-center justify-end p-6 border-t border-solid border-slate-200 rounded-b">
-                  <select 
-                  className="mr-4 p-2 bg-white border border-gray-300 rounded-lg shadow-sm"
-                  value={index} onChange={(e) => {
-                    setIndex(e.target.value);
-                    props.function(listoption[parseInt(e.target.value) as number]);
-                  }
-                  }>
+                <div className="flex items-center justify-between p-6 border-t border-solid border-slate-200 rounded-b">
+                  <select
+                    className={
+                      props.isPending ? "mr-4 p-2 bg-white border border-gray-300 rounded-lg shadow-sm opacity-50 cursor-not-allowed" : "mr-4 p-2 bg-white border border-gray-300 rounded-lg shadow-sm"
+
+                    }
+                    value={listoption[index].errorcode}
+                    onChange={(e) => {
+                      setIndex(parseInt(e.target.value) as number);
+                      props.function(listoption[parseInt(e.target.value) as number]);
+                    }
+                    }>
                     <option disabled>Chọn trạng thái</option>
                     <option value="0">Ẩn cfs</option>
                     <option value="1">Duyệt cfs</option>
-                    <option value="2">Đánh dấu vi phạm</option>
+                    <option value="2">Xóa</option>
                   </select>
-                  <button
-                    className="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                  >
-                    Đóng
-                  </button>
+                  {
+                    props.isPending ?
+                      <button onClick={() => setShowModal(false)} type="button" className="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition ease-in-out duration-150 cursor-not-allowed" disabled>
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Đang xử lý...
+                      </button>
+                      :
+                      <button onClick={() => setShowModal(false)} type="button" className="inline-flex items-center px-8 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition ease-in-out duration-150 ">
+                        Đóng
+                      </button>
+                  }
+
+
                 </div>
               </div>
             </div>
@@ -132,6 +153,7 @@ function Modal(props: ModalProps) {
 }
 
 export default function ConfessionBox() {
+  useDocumentTitle("Quản lý tình trạng của cộng đồng");
   type Confession = {
     id: string;
     content: string;
@@ -139,10 +161,13 @@ export default function ConfessionBox() {
     uid: string;
     status: boolean;
     errormessage: string;
+    errorcode: number;
+    postid: string;
   }
 
   const provider = new GoogleAuthProvider();
   const [user, setUser] = useState<User>({} as User);
+  const [pending, setPending] = useState(false);
   onAuthStateChanged(auth, (user) => {
     if (user) {
       setUser(user);
@@ -157,7 +182,7 @@ export default function ConfessionBox() {
 
 
   const q = query(collection(db, "cfs-box"));
-  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+  onSnapshot(q, (querySnapshot) => {
     const confessions = [] as Array<Confession>;
     querySnapshot.forEach((doc) => {
       confessions.push(doc.data() as Confession);
@@ -165,13 +190,52 @@ export default function ConfessionBox() {
     setConfessionlist(confessions);
   });
 
-  async function handleUpdateStatus(value: Value) {
+  async function handleUpdateStatus(value: Value, content: string) {
     const item = doc(db, "cfs-box", value.id);
-    await updateDoc(item, {
-      status: value.status,
-      errormessage: value.errormessage,
-    });
+    const docRef = doc(db, "pri-data", "habacconfession");
+    const itemSnap = await getDoc(item);
+    const docSnap = await getDoc(docRef);
+    switch (value.errorcode) {
+      case 0:
+        setPending(true);
+
+        if (docSnap.exists()) {
+          await axios.delete(`https://graph.facebook.com/${itemSnap.data()?.postid}?access_token=${docSnap.data().access_token}`)
+          await updateDoc(item, {
+            status: value.status,
+            errormessage: value.errormessage,
+            errorcode: value.errorcode,
+          });
+        } else {
+          //error
+        }
+        setPending(false);
+        break;
+      case 1:
+        setPending(true);
+        if (docSnap.exists()) {
+          const respost = await axios.post(`https://graph.facebook.com/100670066088031/feed?access_token=${docSnap.data().access_token}`, {
+            message: content + "\n#habacconfession\n#habacteam",
+          });
+          await updateDoc(item, {
+            status: value.status,
+            errormessage: value.errormessage,
+            errorcode: value.errorcode,
+            postid: respost.data.id
+          });
+        } else {
+          //error
+        }
+        setPending(false);
+        break;
+      case 2:
+        setPending(true);
+        await deleteDoc(item);
+        setPending(false);
+        break;
+    }
   }
+
 
   async function handleSubmit() {
     signInWithPopup(auth, provider)
@@ -230,18 +294,20 @@ export default function ConfessionBox() {
         }
 
         {user.uid === "w5fukh4LVlQOxGUMUpjNdDE1ymf2" ?
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto p-6 ">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto p-6 mb-16">
             {confessionlist.map((confession) => {
               return (
                 <Modal key={confession.id} data={confession} function={
                   (valuee: Value) => {
-                    handleUpdateStatus(valuee)
+                    handleUpdateStatus(valuee, confession.content);
                   }}
                   value={{
                     id: confession.id,
                     status: confession.status,
                     errormessage: confession.errormessage,
+                    errorcode: confession.errorcode,
                   } as Value}
+                  isPending={pending}
                 />
               );
             })}

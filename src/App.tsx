@@ -3,12 +3,12 @@ import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { db } from './fireConfig';
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { regular } from '@fortawesome/fontawesome-svg-core/import.macro'
 import Logo from "./Assets/LogoWithoutBg.svg"
 
-import DraftLandingpage from './components/LandingPage/DraftLandingPage';
+import Landingpage from './components/LandingPage/LandingPage';
 import NoPage from './components/NoPage/NoPage';
 import Register from './components/Register/Register';
 import Departments from './components/Infomation/Departments';
@@ -16,7 +16,7 @@ import ListAnswer from './components/Register/ListAnswer';
 import ConfessionBox from './components/ConfessionBox/ConfessionBox';
 import ManageConfession from './components/ConfessionBox/ManageConfession';
 import CfsBoxRule from './components/Infomation/CfsBox';
-import AddConfession from './components/ConfessionBox/AddConfession';
+import EditConfession from './components/ConfessionBox/EditConfession';
 import ListConfession from './components/ConfessionBox/ListConfession';
 
 import LeftSideBar from './components/SideBar/LeftSideBar';
@@ -106,51 +106,7 @@ function App() {
 
   //end_state --------------------------------------------
 
-
-  /* TODO: 
-  - facebook: updatetime, data
-  - read updatetime from firebase
-  - if updatetime is not equal to current time, get data from facebook and save to firebase
-  - if updatetime is equal to current time, get data from firebase
-  */
-
-
-
   useEffect(() => {
-    ReadUpdateTime();
-
-    async function ReadUpdateTime() {
-      const docRef = doc(db, "facebook", "update_time");
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        console.log("read update time from firebase");
-        const currentTime = new Date().toLocaleString("en-US", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "numeric",
-          hour12: true,
-          timeZone: "Asia/Ho_Chi_Minh"
-        })
-        const updateTime = data.time
-        console.log("Thoi gian thuc", currentTime);
-        console.log("Thoi gian tren firebases", data.time);
-
-        if (updateTime !== currentTime) {
-          console.log("update time is not equal to current time");
-          //get data from facebook and update to firebase
-          await getFacebookDataAndUpdateFirebase(0)
-        } else {
-          console.log("update time is equal to current time");
-          //get data from firebase
-          await getFacebookDataFromFirebase()
-        }
-      } else {
-        console.log("VCL: docSnap does not exist");
-      }
-    }
-
     async function getFacebookDataFromFirebase() {
 
       const docRef = doc(db, "facebook", "data");
@@ -159,51 +115,12 @@ function App() {
         setAbout(docSnap.data().about)
         setFan_count(docSnap.data().fan_count)
         setFeed(docSnap.data().feed)
-        console.log("get data from firebase")
+        //console.log("get data from firebase")
       } else {
-        console.log("No such document!");
-      }
-
-    }
-    async function getFacebookDataAndUpdateFirebase(index_api: number) {
-
-      const api_url = "https://graph.facebook.com/"
-      const api_key = [
-        "EAALhZCqZAqXbgBAHmrKTuU4iBt2BMTg01iEW2CUdTP7qSHjYxTuPNYI8jkDzMuDtedxhpXnEJs7FRFJOeD9i8araoA5xtu6B3sPMjGkrALOBNsHXlZC3QlWz8Gc4bqDLxOqBRQwkAfbVUzFF7PRV9JZA4BPNoH6dtDi7fBRsAryBLLvztFmAZC8m6hfc6QnIZD",
-        "EAAW48IsfiXMBALQHMdzvpfyQtWxQmKoE4bbYnIpoUFTLKclETxzzLgFhto1992ZBY9qIfb0daiiZCwbL5UUcaWgjq3rWENlkdyHD4BTc7BpxTKpPT5rKBaeTLAxwCGmaZA1wLTNiERA9pITwyakZAtEKhLt3AI7S6YKDfZAtgYrbKtDcslIySzSSC7W20OowZD",
-        "EAAtPXkAhSFQBADhKYwhmFECY0XgyFq1ROwQslKdUZCFBecoZAyrlZA7ISpu2fmlITVG1XEX3TiwHPMvOsJQzlkAgRahs6QFOnlrJk7lo5nzp4tXP0ciKYomTHh7rh5S2XIUQkJYkCZAPMt2Gw4SwedQU8D3Jjz0XYZABZA2Q6mdJIQIEdzTpIFizXv92dO55wZD",
-      ]
-      const page_id = "111037578336120"
-      const field = "about,fan_count,feed{message,permalink_url,full_picture,created_time,reactions.summary(total_count)}"
-      try {
-        if (index_api === api_key.length) {
-          index_api = 0
-        }
-        const full_url = api_url + page_id + "?fields=" + field + "&access_token=" + api_key[index_api]
-        const result = await axios.get(full_url)
-        setAbout(result.data.about)
-        setFan_count(result.data.fan_count)
-        setFeed(result.data.feed)
-        console.log("get data from facebook")
-        await setDoc(doc(db, "facebook", "data"), {
-          ...result.data
-        });
-        console.log("write facebook data to firebase");
-        await setDoc(doc(db, "facebook", "update_time"), {
-          time: new Date().toLocaleString("en-US", {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "numeric",
-            hour12: true,
-            timeZone: "Asia/Ho_Chi_Minh"
-          })
-        });
-        console.log("write update time to firebase");
-      } catch (err) {
-        getFacebookDataAndUpdateFirebase(index_api + 1)
+        //console.log("No such document!");
       }
     }
+    getFacebookDataFromFirebase();
   }, []);
 
   //get data of weather --------------------------------------------
@@ -238,12 +155,12 @@ function App() {
             <img src={Logo} alt="logo" className="w-1/6 h-auto mx-auto " />
           </div>
           <Routes>
-            <Route path="/" element={<DraftLandingpage feed={feed} />} />
+            <Route path="/" element={<Landingpage feed={feed} />} />
             <Route path="/u/">
               <Route path="register" element={<Register />} />
               <Route path="total" element={<ListAnswer />} />
               <Route path="cfsbox" element={<ManageConfession />} />
-              <Route path="addcfs" element={<AddConfession />} />
+              <Route path="editcfs/:id" element={<EditConfession />} />
             </Route>
             <Route path='/g/'>
               <Route path="i/">
@@ -285,14 +202,14 @@ function App() {
               <FontAwesomeIcon icon={regular('comments')} size="lg" />
               <p className="text-[12px] font-normal">Confession Box</p>
             </Link>
-            <button onClick={
+            {/* <button onClick={
               () => {
                 setIsopen(!isopen)
               }
             } className="my-2 p-2 text-slate-600 hover:text-green-900 font-semibold text-center">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width={"20px"} className="mx-auto fill-slate-600"><path d="M0 80C0 53.49 21.49 32 48 32H144C170.5 32 192 53.49 192 80V176C192 202.5 170.5 224 144 224H48C21.49 224 0 202.5 0 176V80zM48 176H144V80H48V176zM0 336C0 309.5 21.49 288 48 288H144C170.5 288 192 309.5 192 336V432C192 458.5 170.5 480 144 480H48C21.49 480 0 458.5 0 432V336zM48 432H144V336H48V432zM400 32C426.5 32 448 53.49 448 80V176C448 202.5 426.5 224 400 224H304C277.5 224 256 202.5 256 176V80C256 53.49 277.5 32 304 32H400zM400 80H304V176H400V80zM256 336C256 309.5 277.5 288 304 288H400C426.5 288 448 309.5 448 336V432C448 458.5 426.5 480 400 480H304C277.5 480 256 458.5 256 432V336zM304 432H400V336H304V432z" /></svg>
               <p className="text-[12px] font-normal">Khác</p>
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

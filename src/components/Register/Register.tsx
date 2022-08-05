@@ -11,25 +11,25 @@ import { collection, addDoc, getDoc, doc, setDoc } from "firebase/firestore";
 export default function Register() {
 
   type FormDataObject = {
-    time: number;
+    time: string;
     name: string;
     yob: number;
     class: string;
     freetime: string;
-    more: string;
     departments: string;
+    more: string;
     contactMethod: string;
     contactInfo: string;
   }
-  const listkey = ["name", "yob", "class", "departments", "freetime", "more", "contactMethod", "contactInfo"];
+  const listkey = ["name", "yob", "class",  "freetime", "departments", "more", "contactMethod", "contactInfo"];
   const [formData, setFormData] = useState<FormDataObject>({
-    time: 0,
+    time: new Date().toLocaleString(),
     name: "",
     yob: 0,
     class: "10A",
     freetime: "",
-    more: "",
     departments: "",
+    more: "",
     contactMethod: "",
     contactInfo: "",
   });
@@ -59,7 +59,7 @@ export default function Register() {
   }, []);
   async function handleSubmit() {
     if (!res_id) {
-      formData.time = Date.now();
+      formData.time = new Date().toLocaleString();
       const docRef = await addDoc(collection(db, "res-register-form"), formData);
       localStorage.setItem("res_register_form_id", docRef.id);
       setSuccess("Đăng ký thành công")
@@ -77,9 +77,9 @@ export default function Register() {
       if (docSnap.exists()) {
         setFormData(docSnap.data() as FormDataObject);
       } else {
-        console.log("Welcome");
+        //console.log("Welcome");
       }
-      console.log("docSnap");
+      //console.log("docSnap");
     }
     getData();
   }, [res_id])

@@ -77,7 +77,7 @@ export default function RightSideBar(props: RightSideBarProps) {
   useEffect(() => {
     function getWeatherIcon() {
       if (weather.weather) {
-        console.log(weather.weather[0].id);
+        //console.log(weather.weather[0].id);
         return `https://s3-us-west-2.amazonaws.com/s.cdpn.io/162656/` + weather?.weather[0]?.icon + `.svg`;
       }
       return "";

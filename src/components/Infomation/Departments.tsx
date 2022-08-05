@@ -4,11 +4,11 @@ export default function Departments() {
   useDocumentTitle("Các ban trong HMC");
   return (
     <>
-      <div className="flex flex-col items-center justify-center">
-        <div className=" text-center py-8">
+      <div className=" overflow-auto h-screen">
+        <div className=" text-center py-4 mt-32 sm:mt-0">
           <h1 className="text-2xl">Các ban trong HMC</h1>
         </div>
-        <div className=" px-16 py-8 sm:px-64 mb-2">
+        <div className=" px-16 py-8 sm:px-16 mb-2">
           <p className="text-lg font-semibold text-center pb-2 pt-4">1.Ban tình nguyện:</p>
           <p>- <span className="font-semibold">Yêu cầu</span>: Là người hướng ngoại, tích cực trong các hoạt động tình nguyện, giao lưu, giao tiếp với mọi người.</p>
           <p>- <span className="font-semibold">Công việc chính</span>: Thực hiện các hoạt động tình nguyện.</p>
@@ -25,9 +25,8 @@ export default function Departments() {
           <p>- <span className="font-semibold">Yêu cầu</span>: hiểu biết, luôn biết cách tìm tòi, khả năng đọc hiểu và chắt lọc cao, nhất là khả năng google. Ngoài ra nên biết 1 chút về chỉnh sửa ảnh và video để tiện thiết kế</p>
           <p>- <span className="font-semibold">Công việc chính</span>: Thực hiện nhiệm vụ đăng bài hàng tuần, ví dụ: meme, 1 số kiến thức trong cuộc sống về nhiều lĩnh vực</p>
 
-
         </div>
-        <Link to="/u/register" className="text-center py-2 px-4 bg-red-500 hover:bg-red-700 text-white mx-auto rounded-lg mb-16">
+        <Link to="/u/register" className="block text-center py-2 px-4 bg-red-500 hover:bg-red-700 text-white mx-auto rounded-lg mb-20">
           Quay lại
         </Link>
       </div>

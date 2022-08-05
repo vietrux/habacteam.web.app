@@ -68,11 +68,13 @@ export default function DraftLandingpage(props: DraftLandingPageProps) {
               )
             })
               : <div className="text-center">
-                <p className="text-sm">Không có bài viết nào</p>
+                <p className="text-sm">Loading...</p>
               </div>
           }
           <div className='sm:hidden h-[10vh] text-center'>
-            Không có bài viết nào
+            {
+              props.feed.data ? "Không còn bài viết nào" : null
+            }
           </div>
         </div>
 

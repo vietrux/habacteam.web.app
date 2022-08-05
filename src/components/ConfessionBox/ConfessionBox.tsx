@@ -1,8 +1,9 @@
 import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, User } from "firebase/auth";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, query, where, onSnapshot, setDoc, doc } from "firebase/firestore";
 import { db, auth } from "../../fireConfig";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
+import useDocumentTitle from "../OtherFunc/useDocumentTitle";
 
 type ModalProps = {
   data: {
@@ -12,6 +13,8 @@ type ModalProps = {
     uid: string;
     status: boolean;
     errormessage: string;
+    errorcode: number;
+    postid: string;
   }
 }
 
@@ -24,7 +27,6 @@ function Modal(props: ModalProps) {
           <p>{props.data.time}</p>
           <p>CfsBox</p>
         </div>
-        <img src="https://picsum.photos/300/150" className="w-full h-auto" alt="lorem picsum" />
         <p style={
           {
             overflow: "hidden",
@@ -70,17 +72,14 @@ function Modal(props: ModalProps) {
                 </div>
                 {/*body*/}
                 <div className="relative p-3 ">
-                  <p style={{whiteSpace: "pre-line"}} className="h-36 my-1 text-slate-500 text-lg leading-relaxed overflow-y-auto scrollbar">
+                  <p style={{ whiteSpace: "pre-line" }} className="h-36 my-1 text-slate-500 text-lg leading-relaxed overflow-y-auto scrollbar">
                     {props.data.content}
                   </p>
                 </div>
                 {/*footer*/}
-                <div className="flex items-center justify-end p-6 border-t border-solid border-slate-200 rounded-b">
-                  <button
-                    className="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                  >
+                <div className="flex items-center justify-between p-6 border-t border-solid border-slate-200 rounded-b">
+                  <a href={`https://facebook.com/${props.data.postid}`} className="text-blue-500">Xem bài viết trên Facebook</a>
+                  <button onClick={() => setShowModal(false)} type="button" className="inline-flex items-center px-8 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition ease-in-out duration-150 ">
                     Đóng
                   </button>
                 </div>
@@ -95,6 +94,7 @@ function Modal(props: ModalProps) {
 }
 
 export default function ConfessionBox() {
+  useDocumentTitle("Confession Box");
   type Confession = {
     id: string;
     content: string;
@@ -102,44 +102,52 @@ export default function ConfessionBox() {
     uid: string;
     status: boolean;
     errormessage: string;
+    errorcode: number;
+    postid: string;
   }
 
   const provider = new GoogleAuthProvider();
   const [user, setUser] = useState<User>({} as User);
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      setUser(user);
-      localStorage.setItem("user_uid", user.uid);
-      //console.log(user);
-    } else {
-      // User is signed out
-    }
-  });
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        // No user is signed in.
+      }
+    });
+  }, []);
 
   const [confessionlist, setConfessionlist] = useState<Array<Confession>>([]);
 
 
-  const q = query(collection(db, "cfs-box"), where("status", "==", true));
-  const unsubscribe = onSnapshot(q, (querySnapshot) => {
-    const confessions = [] as Array<Confession>;
-    querySnapshot.forEach((doc) => {
-      confessions.push(doc.data() as Confession);
+  useEffect(() => {
+    const q = query(collection(db, "cfs-box"), where("status", "==", true));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const confessions = [] as Array<Confession>;
+      querySnapshot.forEach((doc) => {
+        confessions.push(doc.data() as Confession);
+      });
+      setConfessionlist(confessions);
     });
-    setConfessionlist(confessions);
-  });
+    return () => {
+      unsubscribe();
+    }
+  }, []);
 
   async function handleSubmit() {
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        console.log(result.user.uid);
-      }).catch((error) => {
-        console.log(error.code, error.message);
-      });
+    const result = await signInWithPopup(auth, provider);
+
+    await setDoc(doc(db, "cfs-box-users", result.user.uid), {
+      cfs_per_day: 0,
+      write_time: "",
+      status: true,
+    });
   }
   async function handleSignOut() {
     signOut(auth).then(() => {
       setUser({} as User);
-      localStorage.removeItem("user_uid");
     }).catch((error) => {
       console.log(error);
     });
@@ -188,7 +196,7 @@ export default function ConfessionBox() {
         }
 
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto p-6 ">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto p-6 mb-16">
           {confessionlist.map((confession) => {
             return (
               <Modal key={confession.id} data={confession} />
