@@ -8,7 +8,6 @@ import useDocumentTitle from "../OtherFunc/useDocumentTitle";
 export default function EditConfession() {
   type ConfessionBoxUser = {
     cfs_per_day: number;
-    write_time: string;
     status: boolean;
   }
   useDocumentTitle("Thêm cfs");

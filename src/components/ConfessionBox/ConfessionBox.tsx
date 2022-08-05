@@ -1,5 +1,5 @@
 import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, User } from "firebase/auth";
-import { collection, query, where, onSnapshot, setDoc, doc } from "firebase/firestore";
+import { collection, query, where, onSnapshot, setDoc, doc, getDoc } from "firebase/firestore";
 import { db, auth } from "../../fireConfig";
 import { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
@@ -138,12 +138,16 @@ export default function ConfessionBox() {
 
   async function handleSubmit() {
     const result = await signInWithPopup(auth, provider);
-
-    await setDoc(doc(db, "cfs-box-users", result.user.uid), {
-      cfs_per_day: 0,
-      write_time: "",
-      status: true,
-    });
+    const docRef = doc(db, "cfs-box-users", result.user.uid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      // User already exists
+    } else {
+      await setDoc(doc(db, "cfs-box-users", result.user.uid), {
+        cfs_per_day: 0,
+        status: true,
+      });
+    }
   }
   async function handleSignOut() {
     signOut(auth).then(() => {

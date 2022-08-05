@@ -127,7 +127,6 @@ export default function ManageConfession() {
   }
   type ConfessionBoxUser = {
     cfs_per_day: number;
-    write_time: string;
     status: boolean;
   }
   const provider = new GoogleAuthProvider();
