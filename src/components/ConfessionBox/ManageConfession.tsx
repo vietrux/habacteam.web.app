@@ -163,7 +163,7 @@ export default function ManageConfession(props:ManageConfessionProps) {
     setPending(true);
     //delete from firestore
     await updateDoc(doc(db, "users", props.user.uid), {
-      cfs_per_day: props.userdata.cfs_per_day - 1,
+      cfs_per_day: props.userdata.cfs_per_day > 0 ? props.userdata.cfs_per_day - 1 : 0,
       cfs_status: props.userdata.cfs_per_day < 5 ? true : false,
     } as UserData);
     const item = doc(db, "cfs-box", id);
