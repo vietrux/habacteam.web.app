@@ -141,25 +141,19 @@ function App() {
         .then(async (result) => {
           const docRef = doc(db, "users", result.user.uid);
           const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            // User already exists
-          } else {
+          if (!docSnap.exists()) {
             setDoc(doc(db, "users", result.user.uid), {
               cfs_per_day: 0,
               cfs_status: true,
               role: "guest",
             } as UserData);
           }
-        }).catch((error) => {
-          console.log(error.code, error.message);
-        });
+        })
     }
     async function handleSignOut() {
       signOut(auth).then(() => {
         setUser({} as User);
-      }).catch((error) => {
-        console.log(error);
-      });
+      })
     }
     switch (isSignIn) {
       case true:
@@ -171,29 +165,25 @@ function App() {
     }
   }
 
+  //get facebook data from firebase --------------------------------------------
   useEffect(() => {
     async function getFacebookDataFromFirebase() {
-
       const docRef = doc(db, "facebook", "data");
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         setAbout(docSnap.data().about)
         setFan_count(docSnap.data().fan_count)
         setFeed(docSnap.data().feed)
-        //console.log("get data from firebase")
-      } else {
-        //console.log("No such document!");
       }
     }
     getFacebookDataFromFirebase();
   }, []);
+  //end_get facebook data from firebase --------------------------------------------
 
   //get data of weather --------------------------------------------
   useEffect(() => {
     async function getWeather() {
       const ip_addr = await axios.get("https://api.ipify.org?format=json")
-
-      //check if ip_addr is same as last ip_addr
       if (ip_addr.data.ip !== localStorage.getItem("ip_addr") || localStorage.getItem("lat") === null || localStorage.getItem("lon") === null) {
         localStorage.setItem("ip_addr", ip_addr.data.ip)
         const loc = await axios.get(`https://ipinfo.io/${ip_addr.data.ip}?token=d01df29be7f3b2`)
@@ -214,7 +204,6 @@ function App() {
     <BrowserRouter>
       <div className="grid grid-cols-1 sm:grid-cols-[17%_auto_25%] place-items-between w-screen h-screen">
         <LeftSideBar />
-
         <div className='bg-white sm:rounded-r-[4%] sm:shadow-[20px_0_20px_5px_#d7d7d7]'>
           <div className='mx-auto text-center w-full sm:hidden bg-white rounded-2xl shadow-xl shadow-gray-200 p-4 fixed top-0'>
             <img src={Logo} alt="logo" className="w-1/6 h-auto mx-auto " />
@@ -294,7 +283,6 @@ function App() {
           </div>
         </div>
       </div>
-
     </BrowserRouter>
   );
 }

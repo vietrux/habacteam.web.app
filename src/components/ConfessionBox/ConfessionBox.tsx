@@ -17,6 +17,26 @@ type ModalProps = {
     postid: string;
   }
 }
+type ConfessionBoxProps = {
+  user: User,
+  isSignIn: Function,
+  userdata: UserData,
+}
+type UserData = {
+  cfs_per_day: number,
+  cfs_status: boolean,
+  role:string,
+}
+type Confession = {
+  id: string;
+  content: string;
+  time: string;
+  uid: string;
+  status: boolean;
+  errormessage: string;
+  errorcode: number;
+  postid: string;
+}
 
 function Modal(props: ModalProps) {
   const [showModal, setShowModal] = useState(false);
@@ -92,28 +112,9 @@ function Modal(props: ModalProps) {
     </>
   );
 }
-type ConfessionBoxProps = {
-  user: User,
-  isSignIn: Function,
-  userdata: UserData,
-}
-type UserData = {
-  cfs_per_day: number,
-  cfs_status: boolean,
-  role:string,
-}
+
 export default function ConfessionBox(props:ConfessionBoxProps) {
   useDocumentTitle("Confession Box");
-  type Confession = {
-    id: string;
-    content: string;
-    time: string;
-    uid: string;
-    status: boolean;
-    errormessage: string;
-    errorcode: number;
-    postid: string;
-  }
   const [confessionlist, setConfessionlist] = useState<Array<Confession>>([]);
   useEffect(() => {
     const q = query(collection(db, "cfs-box"), where("status", "==", true));
@@ -179,8 +180,6 @@ export default function ConfessionBox(props:ConfessionBoxProps) {
           : null
         }
         </div>
-        
-
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto p-6 mb-16">
           {confessionlist.map((confession) => {
             return (

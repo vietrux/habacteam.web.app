@@ -26,7 +26,6 @@ type DraftLandingPageProps = {
   }
 }
 
-
 export default function DraftLandingpage(props: DraftLandingPageProps) {
   useDocumentTitle("Trang chủ");
   return (
@@ -77,7 +76,6 @@ export default function DraftLandingpage(props: DraftLandingPageProps) {
             }
           </div>
         </div>
-
       </div>
     </>
   )

@@ -143,7 +143,6 @@ export default function ManageConfession(props:ManageConfessionProps) {
     }
   }, [props.user.uid, navigate]);
 
-
   const [confessionlist, setConfessionlist] = useState<Array<Confession>>([]);
 
   useEffect(() => {
@@ -159,7 +158,6 @@ export default function ManageConfession(props:ManageConfessionProps) {
       unsubscribe();
     }
   }, [props.user]);
-
 
   async function handleDelete(id: string) {
     setPending(true);

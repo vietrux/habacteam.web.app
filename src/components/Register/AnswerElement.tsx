@@ -7,9 +7,7 @@ type AnswerElementProps = {
   value?: any;
 }
 export default function AnswerElement(props: AnswerElementProps) {
-
   if (props.type === "text") {
-  
     return (
       <input type="text" className="w-full text-xl pb-1 border-b border-b-slate-300 focus:outline-none"
         placeholder={props.placeholder}
@@ -21,16 +19,13 @@ export default function AnswerElement(props: AnswerElementProps) {
       />
     );
   }
-
   if (props.type === "select") {
-  
     return (
       <select className="w-full text-lg pb-1 border-b border-b-slate-300 focus:outline-none" onChange={
         (e) => {
           props.function(e.target.value);
         }}
         value={props.value}
-        
       >
         {props.options?.map((option, index) => {
           return (
@@ -41,9 +36,7 @@ export default function AnswerElement(props: AnswerElementProps) {
       </select>
     )
   }
-
   if (props.type === "radio") {
-  
     return (
       <div className="flex flex-col">
         {

@@ -13,7 +13,6 @@ export default function LeftSideBar() {
         </div>
         <div className="flex flex-col">
           <div className="w-4/5 border-b border-slate-300 text-center mx-auto"></div>
-          {/* <h1 className="h-auto mt-4 mx-auto text-center font-bold text-lg"></h1> */}
           <div className="flex flex-col mx-auto my-6">
             <Link to="/" className="my-2 p-2 text-slate-600 hover:text-green-900 font-semibold">
               <FontAwesomeIcon icon={regular('compass')} size="lg" /> <span className="ml-2">Trang chủ</span>

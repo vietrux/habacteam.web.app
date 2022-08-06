@@ -57,6 +57,7 @@ export default function Register() {
     }
     checkincognito();
   }, []);
+  
   async function handleSubmit() {
     if (!res_id) {
       formData.time = new Date().toLocaleString();
@@ -69,17 +70,13 @@ export default function Register() {
     }
   }
 
-
   useEffect(() => {
     async function getData() {
       const docRef = doc(db, "res-register-form", res_id || "a");
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         setFormData(docSnap.data() as FormDataObject);
-      } else {
-        //console.log("Welcome");
       }
-      //console.log("docSnap");
     }
     getData();
   }, [res_id])
@@ -94,7 +91,6 @@ export default function Register() {
         <div className="w-full h-full grid content-center">
           <h1 className="text-2xl sm:text-4xl font-bold w-3/5 mx-auto">{localStorage.getItem("res_register_form_id") ? "Cập nhật" : "Đăng ký"}</h1>
           <div className="w-3/5 mx-auto">
-
             <div className="py-8">
               <p>{(ques_id + 1) + "/" + listkey.length}</p><h1 className="text-2xl font-medium">{list_question_new[ques_id].question}</h1>
             </div>
@@ -150,7 +146,6 @@ export default function Register() {
                   }</button>)
                   : (<></>)
               }
-
             </div>
             {showModal ? (
               <>
@@ -204,7 +199,6 @@ export default function Register() {
               <Link to="/g/i/departments" className="text-[blue] hover:text-blue-500">&gt;Tìm hiểu về các ban trong CLB</Link>
             </div>
           </div>
-
         </div>
       }
     </>

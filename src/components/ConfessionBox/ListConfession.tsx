@@ -1,9 +1,10 @@
 import { User } from "firebase/auth";
 import { collection, doc, query, getDoc, onSnapshot, updateDoc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../../fireConfig";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useDocumentTitle from "../OtherFunc/useDocumentTitle";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 type Value = {
   id: string;
@@ -159,8 +160,6 @@ function Modal(props: ModalProps) {
                         Đóng
                       </button>
                   }
-
-
                 </div>
               </div>
             </div>
@@ -171,22 +170,31 @@ function Modal(props: ModalProps) {
     </>
   );
 }
-export default function ConfessionBox(props: ConfessionBoxProps) {
+export default function ListConfession(props: ConfessionBoxProps) {
   useDocumentTitle("Quản lý tình trạng của cộng đồng");
-
   const [pending, setPending] = useState(false);
-
   const [confessionlist, setConfessionlist] = useState<Array<Confession>>([]);
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!props.user.uid) {
+      navigate("/g/cfsbox");
+    }
+  }, [props.user.uid, navigate]);
 
-  const q = query(collection(db, "cfs-box"));
-  onSnapshot(q, (querySnapshot) => {
-    const confessions = [] as Array<Confession>;
-    querySnapshot.forEach((doc) => {
-      confessions.push(doc.data() as Confession);
+  useEffect(() => {
+    const q = query(collection(db, "cfs-box"));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const confessions = [] as Array<Confession>;
+      querySnapshot.forEach((doc) => {
+        confessions.push(doc.data() as Confession);
+      });
+      setConfessionlist(confessions);
     });
-    setConfessionlist(confessions);
-  });
+    return () => {
+      unsubscribe();
+    }
+  }, []);
 
   async function handleUpdateStatus(value: Value, content: string) {
     const item = doc(db, "cfs-box", value.id);
@@ -203,8 +211,6 @@ export default function ConfessionBox(props: ConfessionBoxProps) {
             errormessage: value.errormessage,
             errorcode: value.errorcode,
           } as Confession);
-        } else {
-          //error
         }
         setPending(false);
         break;
@@ -220,8 +226,6 @@ export default function ConfessionBox(props: ConfessionBoxProps) {
             errorcode: value.errorcode,
             postid: respost.data.id
           } as Confession);
-        } else {
-          //error
         }
         setPending(false);
         break;

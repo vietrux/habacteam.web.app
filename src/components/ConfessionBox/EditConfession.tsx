@@ -15,18 +15,17 @@ type UserData = {
   cfs_status: boolean,
   role: string,
 }
-export default function EditConfession(props: EditConfessionProps) {
-
-  type Confession = {
-    id: string;
-    content: string;
-    time: string;
-    uid: string;
-    status: boolean;
-    errormessage: string;
-    errorcode: number;
-    postid: string;
-  }
+type Confession = {
+  id: string;
+  content: string;
+  time: string;
+  uid: string;
+  status: boolean;
+  errormessage: string;
+  errorcode: number;
+  postid: string;
+}
+export default function EditConfession(props: EditConfessionProps) { 
   useDocumentTitle("Thêm cfs");
   const [content, setContent] = useState("");
   const [doc_id, setDoc_id] = useState("");
@@ -53,8 +52,6 @@ export default function EditConfession(props: EditConfessionProps) {
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         setContent(docSnap.data().content);
-      } else {
-        //console.log("Welcome");
       }
     }
     if (id && id !== "new") {
