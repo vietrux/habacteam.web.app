@@ -1,45 +1,59 @@
 import { useEffect, useState } from "react";
-import { onAuthStateChanged, User } from "firebase/auth";
+import { User } from "firebase/auth";
 import { collection, doc, addDoc, updateDoc, getDoc, deleteDoc } from "firebase/firestore";
-import { db, auth } from "../../fireConfig";
-import { Link, useParams } from "react-router-dom";
+import { db } from "../../fireConfig";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import useDocumentTitle from "../OtherFunc/useDocumentTitle";
 
-export default function EditConfession() {
+type EditConfessionProps = {
+  user: User,
+  isSignIn: Function,
+}
+
+export default function EditConfession(props: EditConfessionProps) {
   type ConfessionBoxUser = {
     cfs_per_day: number;
     status: boolean;
   }
+  type Confession = {
+    id: string;
+    content: string;
+    time: string;
+    uid: string;
+    status: boolean;
+    errormessage: string;
+    errorcode: number;
+    postid: string;
+  }
   useDocumentTitle("Thêm cfs");
-  const [user, setUser] = useState<User>({} as User);
   const [cfsboxuser, setCfsboxuser] = useState<ConfessionBoxUser>({} as ConfessionBoxUser);
   const [content, setContent] = useState("");
   const [doc_id, setDoc_id] = useState("");
   const [signal, setSignal] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
-
+  const navigate = useNavigate();
 
   useEffect(() => {
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setUser(user);
-        //get user's data from firestore
-        const docRef = doc(db, "cfs-box-users", user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setCfsboxuser(docSnap.data() as ConfessionBoxUser);
-          if (!docSnap.data().status ) {
-            window.location.href = "/u/cfsbox";
-          }
-        } else {
-          //console.log("Welcome");
+    async function getData() {
+      const docRef = doc(db, "cfs-box-users", props.user.uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setCfsboxuser(docSnap.data() as ConfessionBoxUser);
+        if (!docSnap.data().status) {
+          navigate("/u/cfsbox");
         }
       } else {
-        window.location.href = "/g/cfsbox";
+        //console.log("Welcome");
       }
-    });
-  }, []);
+    }
+    if (props.user.uid) {
+      //get user's data from firestore
+      getData()
+    } else {
+      navigate("/g/cfsbox");
+    }
+  }, [props.user.uid, navigate]);
 
   //get id from url params
   const id = useParams().id;
@@ -68,22 +82,23 @@ export default function EditConfession() {
         id: "",
         content,
         time: new Date().toLocaleString(),
-        uid: user.uid,
+        uid: props.user.uid,
         status: false,
         errormessage: "",
         errorcode: 0,
         link: "",
-      });
-      
+        postid: "",
+      } as Confession);
+
       const item = doc(db, "cfs-box", docRef.id);
       console.log(docRef.id);
       await updateDoc(item, {
         id: docRef.id,
-      });
-      await updateDoc(doc(db, "cfs-box-users", user.uid), {
+      } as Confession);
+      await updateDoc(doc(db, "cfs-box-users", props.user.uid), {
         cfs_per_day: cfsboxuser.cfs_per_day + 1,
         status: cfsboxuser.cfs_per_day < 5 ? true : false,
-      });
+      } as ConfessionBoxUser);
       setSignal("Đã thêm mới");
       setPending(false);
       setDoc_id(docRef.id);
@@ -97,7 +112,7 @@ export default function EditConfession() {
       const item = doc(db, "cfs-box", doc_id)
       await updateDoc(item, {
         content: content,
-      });
+      } as Confession);
       setSignal("Đã cập nhật");
       setPending(false);
     } else {
@@ -109,10 +124,10 @@ export default function EditConfession() {
     //delete from firestore
     const item = doc(db, "cfs-box", doc_id);
     await deleteDoc(item);
-    await updateDoc(doc(db, "cfs-box-users", user.uid), {
+    await updateDoc(doc(db, "cfs-box-users", props.user.uid), {
       cfs_per_day: cfsboxuser.cfs_per_day - 1,
-      status: cfsboxuser.cfs_per_day < 6 ? true : false,
-    });
+      status: cfsboxuser.cfs_per_day < 5 ? true : false,
+    } as ConfessionBoxUser);
     setPending(false);
     setSignal("Đã xóa");
   }

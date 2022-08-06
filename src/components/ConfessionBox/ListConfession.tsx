@@ -1,7 +1,7 @@
-import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, User } from "firebase/auth";
+import { User } from "firebase/auth";
 import { collection, doc, query, getDoc, onSnapshot, updateDoc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../../fireConfig";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useDocumentTitle from "../OtherFunc/useDocumentTitle";
 import axios from "axios";
 
@@ -92,18 +92,20 @@ function Modal(props: ModalProps) {
                   <h3 className="text-xl font-semibold">
                     {props.data.errormessage ? "Vi phạm" : props.data.status ? "Đã xác nhận" : "Chưa xác nhận"}
                   </h3>
-                  <button
-                    className="p-1 ml-auto bg-transparent border-0 text-black opacity-5 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
-                    onClick={() => setShowModal(false)}
-                  >
-                    <span className="bg-transparent text-black opacity-5 h-6 w-6 text-2xl block outline-none focus:outline-none">
-                      ×
-                    </span>
-                  </button>
+                  {
+                    props.data.status ?
+                      null : <button
+                        onClick={
+                          () => {
+                            props.function(listoption[2]);
+                          }
+                        }
+                        className="text-xl font-semibold">Xóa</button>
+                  }
                 </div>
                 {/*body*/}
                 <div className="relative p-3 flex-auto">
-                  <p style={{ whiteSpace: "pre-line" }} className="h-36 my-1 text-slate-500 text-lg leading-relaxed overflow-y-auto scrollbar">
+                  <p style={{ whiteSpace: "pre-line" }} className="h-36 my-1 text-slate-900 text-lg leading-relaxed overflow-y-auto scrollbar">
                     {props.data.content}
                   </p>
                 </div>
@@ -123,7 +125,6 @@ function Modal(props: ModalProps) {
                     <option disabled>Chọn trạng thái</option>
                     <option value="0">Ẩn cfs</option>
                     <option value="1">Duyệt cfs</option>
-                    <option value="2">Xóa</option>
                   </select>
                   {
                     props.isPending ?
@@ -152,7 +153,11 @@ function Modal(props: ModalProps) {
   );
 }
 
-export default function ConfessionBox() {
+type ConfessionBoxProps = {
+  user: User,
+  isSignIn: Function,
+}
+export default function ConfessionBox(props:ConfessionBoxProps) {
   useDocumentTitle("Quản lý tình trạng của cộng đồng");
   type Confession = {
     id: string;
@@ -165,18 +170,21 @@ export default function ConfessionBox() {
     postid: string;
   }
 
-  const provider = new GoogleAuthProvider();
-  const [user, setUser] = useState<User>({} as User);
   const [pending, setPending] = useState(false);
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      setUser(user);
-      localStorage.setItem("user_uid", user.uid);
-      //console.log(user);
-    } else {
-      // User is signed out
+  // onAuthStateChanged(auth, (user) => {
+  //   if (user) {
+  //     setUser(user);
+  //     localStorage.setItem("user_uid", user.uid);
+  //     //console.log(user);
+  //   } else {
+  //     // User is signed out
+  //   }
+  // });
+  useEffect(() => {
+    if(props.user.uid){
+      localStorage.setItem("user_uid", props.user.uid);
     }
-  });
+  } , [props.user.uid]);
 
   const [confessionlist, setConfessionlist] = useState<Array<Confession>>([]);
 
@@ -198,14 +206,13 @@ export default function ConfessionBox() {
     switch (value.errorcode) {
       case 0:
         setPending(true);
-
         if (docSnap.exists()) {
-          await axios.delete(`https://graph.facebook.com/${itemSnap.data()?.postid}?access_token=${docSnap.data().access_token}`)
-          await updateDoc(item, {
+          axios.delete(`https://graph.facebook.com/${itemSnap.data()?.postid}?access_token=${docSnap.data().access_token}`)
+          updateDoc(item, {
             status: value.status,
             errormessage: value.errormessage,
             errorcode: value.errorcode,
-          });
+          } as Confession);
         } else {
           //error
         }
@@ -217,12 +224,12 @@ export default function ConfessionBox() {
           const respost = await axios.post(`https://graph.facebook.com/100670066088031/feed?access_token=${docSnap.data().access_token}`, {
             message: content + "\n#habacconfession\n#habacteam",
           });
-          await updateDoc(item, {
+          updateDoc(item, {
             status: value.status,
             errormessage: value.errormessage,
             errorcode: value.errorcode,
             postid: respost.data.id
-          });
+          } as Confession);
         } else {
           //error
         }
@@ -236,39 +243,22 @@ export default function ConfessionBox() {
     }
   }
 
-
-  async function handleSubmit() {
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        console.log(result.user.uid);
-      }).catch((error) => {
-        console.log(error.code, error.message);
-      });
-  }
-  async function handleSignOut() {
-    signOut(auth).then(() => {
-      setUser({} as User);
-      localStorage.removeItem("user_uid");
-    }).catch((error) => {
-      console.log(error);
-    });
-  }
   return (
     <>
       <div className="w-full h-screen overflow-y-auto">
         <div className="flex items-center justify-around w-full mt-32 sm:mt-8 mb-8">
-          <div className="text-2xl sm:text-4xl font-bold self-center">Confession Box</div>
+          <div className="text-2xl sm:text-4xl font-bold self-center">Cfs Box Admin</div>
           <div className="self-center flex items-center">
             {auth.currentUser ?
               <div className="inline-flex">
                 <div className="flex items-center space-x-4">
-                  <img className="w-10 h-10 rounded-full" src={user?.photoURL || ""} alt="" />
+                  <img className="w-10 h-10 rounded-full" src={props.user?.photoURL || ""} alt="" />
                   <div className="font-medium ">
-                    <div>{user.displayName}</div>
+                    <div>{props.user.displayName}</div>
                     <button
                       onClick={
                         () => {
-                          handleSignOut()
+                          props.isSignIn(false);
                         }
                       }
                       className="text-sm text-gray-500 ">Đăng xuất</button>
@@ -278,7 +268,7 @@ export default function ConfessionBox() {
               :
               <button type="button" onClick={
                 () => {
-                  handleSubmit()
+                  props.isSignIn(true)
                 }
               } className="inline-flex bg-red-600 text-white p-2 rounded-md items-center">
                 <svg className="h-6 w-auto mr-2 mb-[-2px]" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path></svg>
@@ -288,12 +278,12 @@ export default function ConfessionBox() {
         </div>
 
         {
-          user.uid !== "w5fukh4LVlQOxGUMUpjNdDE1ymf2" ?
+          props.user.uid !== ("w5fukh4LVlQOxGUMUpjNdDE1ymf2" || "lpODpLtFWLgcuqHZzmmcQWblTzi2") ?
             <p className=" mx-auto py-2 text-center">Bạn phải đăng nhập với tài khoản Admin để sử dụng chức năng này</p> :
             null
         }
 
-        {user.uid === "w5fukh4LVlQOxGUMUpjNdDE1ymf2" ?
+        {props.user.uid === "w5fukh4LVlQOxGUMUpjNdDE1ymf2" || "lpODpLtFWLgcuqHZzmmcQWblTzi2" ?
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto p-6 mb-16">
             {confessionlist.map((confession) => {
               return (

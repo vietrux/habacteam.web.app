@@ -1,5 +1,5 @@
-import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, User } from "firebase/auth";
-import { collection, query, where, onSnapshot, setDoc, doc, getDoc } from "firebase/firestore";
+import { User } from "firebase/auth";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db, auth } from "../../fireConfig";
 import { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
@@ -72,7 +72,7 @@ function Modal(props: ModalProps) {
                 </div>
                 {/*body*/}
                 <div className="relative p-3 ">
-                  <p style={{ whiteSpace: "pre-line" }} className="h-36 my-1 text-slate-500 text-lg leading-relaxed overflow-y-auto scrollbar">
+                  <p style={{ whiteSpace: "pre-line" }} className="h-36 my-1 text-slate-900 text-lg leading-relaxed overflow-y-auto scrollbar">
                     {props.data.content}
                   </p>
                 </div>
@@ -92,8 +92,11 @@ function Modal(props: ModalProps) {
     </>
   );
 }
-
-export default function ConfessionBox() {
+type ConfessionBoxProps = {
+  user: User,
+  isSignIn: Function,
+}
+export default function ConfessionBox(props:ConfessionBoxProps) {
   useDocumentTitle("Confession Box");
   type Confession = {
     id: string;
@@ -106,19 +109,6 @@ export default function ConfessionBox() {
     postid: string;
   }
 
-  const provider = new GoogleAuthProvider();
-  const [user, setUser] = useState<User>({} as User);
-
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-      } else {
-        // No user is signed in.
-      }
-    });
-  }, []);
-
   const [confessionlist, setConfessionlist] = useState<Array<Confession>>([]);
 
 
@@ -129,33 +119,12 @@ export default function ConfessionBox() {
       querySnapshot.forEach((doc) => {
         confessions.push(doc.data() as Confession);
       });
-      setConfessionlist(confessions);
+      setConfessionlist(confessions as Array<Confession>);
     });
     return () => {
       unsubscribe();
     }
   }, []);
-
-  async function handleSubmit() {
-    const result = await signInWithPopup(auth, provider);
-    const docRef = doc(db, "cfs-box-users", result.user.uid);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      // User already exists
-    } else {
-      await setDoc(doc(db, "cfs-box-users", result.user.uid), {
-        cfs_per_day: 0,
-        status: true,
-      });
-    }
-  }
-  async function handleSignOut() {
-    signOut(auth).then(() => {
-      setUser({} as User);
-    }).catch((error) => {
-      console.log(error);
-    });
-  }
   return (
     <>
       <div className="w-full h-screen overflow-y-auto">
@@ -165,13 +134,13 @@ export default function ConfessionBox() {
             {auth.currentUser ?
               <div className="inline-flex">
                 <div className="flex items-center space-x-4">
-                  <img className="w-10 h-10 rounded-full" src={user?.photoURL || ""} alt="" />
+                  <img className="w-10 h-10 rounded-full" src={props.user?.photoURL || ""} alt="" />
                   <div className="font-medium ">
-                    <div>{user.displayName}</div>
+                    <div>{props.user.displayName}</div>
                     <button
                       onClick={
                         () => {
-                          handleSignOut()
+                          props.isSignIn(false);
                         }
                       }
                       className="text-sm text-gray-500 ">Đăng xuất</button>
@@ -181,7 +150,7 @@ export default function ConfessionBox() {
               :
               <button type="button" onClick={
                 () => {
-                  handleSubmit()
+                  props.isSignIn(true);
                 }
               } className="inline-flex bg-red-600 text-white p-2 rounded-md items-center">
                 <svg className="h-6 w-auto mr-2 mb-[-2px]" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path></svg>
@@ -189,16 +158,25 @@ export default function ConfessionBox() {
               </button>}
           </div>
         </div>
+        <div className="flex">
         {
-          auth.currentUser ?
-            <Link to="/u/cfsbox" className="w-2/3 block mx-auto py-2 bg-yellow-300 text-black text-center rounded-lg shadow-lg shadow-slate-300">
+          props.user.uid ?
+            <Link to="/u/cfsbox" className="w-1/3 block mx-auto py-2 bg-yellow-300 text-black text-center rounded-lg shadow-lg shadow-slate-300">
               Quản lý CfsBox của bạn
             </Link>
             : <p className=" mx-auto py-2 text-center">
               Đăng nhập để viết confession
             </p>
         }
-
+        {
+          props.user.uid && props.user.uid === ("w5fukh4LVlQOxGUMUpjNdDE1ymf2" || "lpODpLtFWLgcuqHZzmmcQWblTzi2") ?
+          <Link to="/a/cfsbox" className="w-1/3 block mx-auto py-2 bg-yellow-300 text-black text-center rounded-lg shadow-lg shadow-slate-300">
+              Quản lý toàn bộ CfsBox (Admin)
+          </Link>
+          : null
+        }
+        </div>
+        
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto p-6 mb-16">
           {confessionlist.map((confession) => {

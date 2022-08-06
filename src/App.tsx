@@ -2,8 +2,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { db } from './fireConfig';
-import { doc, getDoc } from "firebase/firestore";
+import { db, auth } from './fireConfig';
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, User } from "firebase/auth";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { regular } from '@fortawesome/fontawesome-svg-core/import.macro'
 import Logo from "./Assets/LogoWithoutBg.svg"
@@ -95,9 +96,14 @@ function App() {
     name: string;
     cod: number;
   }
+  type ConfessionBoxUser = {
+    cfs_per_day: number;
+    status: boolean;
+  }
   //end type
 
   //state --------------------------------------------
+  const [user, setUser] = useState<User>({} as User);
   const [about, setAbout] = useState("");
   const [fan_count, setFan_count] = useState(0);
   const [feed, setFeed] = useState({} as FeedType);
@@ -105,6 +111,53 @@ function App() {
   const [isopen, setIsopen] = useState(false);
 
   //end_state --------------------------------------------
+
+  useEffect(() => {
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        //
+      }
+    });
+  }, []);
+
+  const provider = new GoogleAuthProvider();
+
+  async function handleSign(isSignIn: boolean) {
+    async function handleSignIn() {
+      signInWithPopup(auth, provider)
+        .then(async (result) => {
+          const docRef = doc(db, "cfs-box-users", result.user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            // User already exists
+          } else {
+            setDoc(doc(db, "cfs-box-users", result.user.uid), {
+              cfs_per_day: 0,
+              status: true,
+            } as ConfessionBoxUser);
+          }
+        }).catch((error) => {
+          console.log(error.code, error.message);
+        });
+    }
+    async function handleSignOut() {
+      signOut(auth).then(() => {
+        setUser({} as User);
+      }).catch((error) => {
+        console.log(error);
+      });
+    }
+    switch (isSignIn) {
+      case true:
+        handleSignIn()
+        break;
+      case false:
+        handleSignOut()
+        break;
+    }
+  }
 
   useEffect(() => {
     async function getFacebookDataFromFirebase() {
@@ -159,18 +212,34 @@ function App() {
             <Route path="/u/">
               <Route path="register" element={<Register />} />
               <Route path="total" element={<ListAnswer />} />
-              <Route path="cfsbox" element={<ManageConfession />} />
-              <Route path="editcfs/:id" element={<EditConfession />} />
+              <Route path="cfsbox" element={<ManageConfession user={user} isSignIn={
+                (value:boolean) => {
+                  handleSign(value)
+                }
+              }/>} />
+              <Route path="editcfs/:id" element={<EditConfession user={user} isSignIn={
+                (value:boolean) => {
+                  handleSign(value)
+                }
+              }/>} />
             </Route>
             <Route path='/g/'>
               <Route path="i/">
                 <Route path="departments" element={<Departments />} />
                 <Route path="cfsbox" element={<CfsBoxRule />} />
               </Route>
-              <Route path="cfsbox" element={<ConfessionBox />} />
+              <Route path="cfsbox" element={<ConfessionBox user={user} isSignIn={
+                (value:boolean) => {
+                  handleSign(value)
+                }
+              }/>} />
             </Route>
             <Route path='/a/'>
-              <Route path="cfsbox" element={<ListConfession />} />
+              <Route path="cfsbox" element={<ListConfession user={user} isSignIn={
+                (value:boolean) => {
+                  handleSign(value)
+                }
+              }/>} />
             </Route>
             <Route path='*' element={<NoPage />} />
           </Routes>

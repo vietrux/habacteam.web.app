@@ -1,8 +1,8 @@
-import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, User } from "firebase/auth";
+import { User } from "firebase/auth";
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../../fireConfig";
 import { useEffect, useState } from "react";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import useDocumentTitle from "../OtherFunc/useDocumentTitle";
 
 type ModalProps = {
@@ -17,7 +17,7 @@ type ModalProps = {
     postid: string;
   }
   function: Function;
-  isPending:boolean;
+  isPending: boolean;
 }
 
 function Modal(props: ModalProps) {
@@ -66,18 +66,18 @@ function Modal(props: ModalProps) {
                   </h3>
                   {
                     props.data.status ?
-                      null : <button 
+                      null : <button
                         onClick={
                           () => {
                             props.function(props.data.id);
                           }
                         }
-                      className="text-xl font-semibold">Xóa</button>
+                        className="text-xl font-semibold">Xóa</button>
                   }
                 </div>
                 {/*body*/}
                 <div className="relative p-3 flex-auto">
-                  <p style={{ whiteSpace: "pre-line" }} className="h-36 my-1 text-slate-700 text-lg leading-relaxed overflow-y-auto scrollbar">
+                  <p style={{ whiteSpace: "pre-line" }} className="h-36 my-1 text-slate-900 text-lg leading-relaxed overflow-y-auto scrollbar">
                     {props.data.content}
                   </p>
                 </div>
@@ -112,8 +112,11 @@ function Modal(props: ModalProps) {
     </>
   );
 }
-
-export default function ManageConfession() {
+type ManageConfessionProps = {
+  user : User,
+  isSignIn: Function,
+}
+export default function ManageConfession(props:ManageConfessionProps) {
   useDocumentTitle("Quản lý Confession");
   type Confession = {
     id: string;
@@ -129,33 +132,28 @@ export default function ManageConfession() {
     cfs_per_day: number;
     status: boolean;
   }
-  const provider = new GoogleAuthProvider();
-  const [user, setUser] = useState<User>({} as User);
   const [cfsboxuser, setCfsboxuser] = useState<ConfessionBoxUser>({} as ConfessionBoxUser);
   const [pending, setPending] = useState(false);
+  const navigate = useNavigate();
   useEffect(() => {
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setUser(user);
-      } else {
-        window.location.href = "/g/cfsbox";
-      }
-    });
-  }, []);
+    if (!props.user.uid) {
+      navigate("/g/cfsbox");
+    }
+  }, [props.user.uid, navigate]);
 
   useEffect(() => {
-    const unsub = onSnapshot(doc(db, "cfs-box-users", user.uid || "a"), (doc) => {
+    const unsub = onSnapshot(doc(db, "cfs-box-users", props.user.uid || "a"), (doc) => {
       setCfsboxuser(doc.data() as ConfessionBoxUser);
-  });
-  return () => {
-    unsub();
-  }
-  }, [user.uid]);
+    });
+    return () => {
+      unsub();
+    }
+  }, [props.user.uid]);
 
   const [confessionlist, setConfessionlist] = useState<Array<Confession>>([]);
 
   useEffect(() => {
-    const q = query(collection(db, "cfs-box"), where("uid", "==", user.uid || ""));
+    const q = query(collection(db, "cfs-box"), where("uid", "==", props.user.uid || ""));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const confessions = [] as Array<Confession>;
       querySnapshot.forEach((doc) => {
@@ -166,35 +164,19 @@ export default function ManageConfession() {
     return () => {
       unsubscribe();
     }
-  }, [user]);
+  }, [props.user]);
 
 
   async function handleDelete(id: string) {
     setPending(true);
     //delete from firestore
-    await updateDoc(doc(db, "cfs-box-users", user.uid), {
+    await updateDoc(doc(db, "cfs-box-users", props.user.uid), {
       cfs_per_day: cfsboxuser.cfs_per_day - 1,
-      status: cfsboxuser.cfs_per_day < 6  ? true : false,
+      status: cfsboxuser.cfs_per_day < 5 ? true : false,
     });
     const item = doc(db, "cfs-box", id);
     await deleteDoc(item);
     setPending(false);
-  }
-
-  async function handleSignIn() {
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        //user signed in
-      }).catch((error) => {
-        console.log(error.code, error.message);
-      });
-  }
-  async function handleSignOut() {
-    signOut(auth).then(() => {
-      setUser({} as User);
-    }).catch((error) => {
-      console.log(error);
-    });
   }
   return (
     <>
@@ -205,13 +187,13 @@ export default function ManageConfession() {
             {auth.currentUser ?
               <div className="inline-flex">
                 <div className="flex items-center space-x-4">
-                  <img className="w-10 h-10 rounded-full" src={user?.photoURL || ""} alt="" />
+                  <img className="w-10 h-10 rounded-full" src={props.user?.photoURL || ""} alt="" />
                   <div className="font-medium ">
-                    <div>{user.displayName}</div>
+                    <div>{props.user.displayName}</div>
                     <button
                       onClick={
                         () => {
-                          handleSignOut()
+                          props.isSignIn(false);
                         }
                       }
                       className="text-sm text-gray-500 ">Đăng xuất</button>
@@ -221,7 +203,7 @@ export default function ManageConfession() {
               :
               <button type="button" onClick={
                 () => {
-                  handleSignIn()
+                  props.isSignIn(true)
                 }
               } className="inline-flex bg-red-600 text-white p-2 rounded-md items-center">
                 <svg className="h-6 w-auto mr-2 mb-[-2px]" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path></svg>
@@ -230,10 +212,10 @@ export default function ManageConfession() {
           </div>
         </div>
         <div className="flex w-full">
-          <Link to="/g/cfsbox" className="w-[31%] mx-auto py-2 bg-yellow-300 text-black text-center rounded-lg shadow-lg shadow-slate-300">
+          <Link to="/g/cfsbox" className="w-[31%] mx-auto bg-yellow-300 py-2 px-4 rounded-lg text-center shadow-lg shadow-slate-300">
             Quay về
           </Link>
-          <Link to="/g/i/cfsbox" className="w-[31%] mx-auto py-2 bg-yellow-300 text-black text-center rounded-lg shadow-lg shadow-slate-300">
+          <Link to="/g/i/cfsbox" className="w-[31%] mx-auto py-2 bg-yellow-300 text-center rounded-lg shadow-lg shadow-slate-300">
             Nội quy
           </Link>
           {
@@ -241,15 +223,33 @@ export default function ManageConfession() {
               <Link to="/u/editcfs/new" className="w-[31%] mx-auto py-2 bg-yellow-300 text-black text-center rounded-lg shadow-lg shadow-slate-300">
                 Thêm mới
               </Link>
-              : null
+              : 
+              <button className="w-[31%] mx-auto py-2 bg-yellow-300 text-black text-center rounded-lg shadow-lg shadow-slate-300 cursor-not-allowed disabled:bg-yellow-200 disabled:text-slate-500" disabled>
+                Thêm mới
+              </button>
           }
         </div>
+
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto p-6 mb-16">
+          {
+            cfsboxuser.status ?
+              <div className="grid grid-cols-1 grid-row-3 place-content-center w-full h-full rounded-lg shadow-2xl shadow-slate-400 p-4">
+                <p className="text-center">Bạn còn lại:</p>
+                <p className="text-2xl font-bold text-center">{5 - cfsboxuser.cfs_per_day}</p>
+                <p className="text-center">Lượt thêm mới</p>
+              </div> :
+              <div className="grid grid-cols-1 grid-row-3 place-content-center w-full h-full rounded-lg shadow-2xl shadow-slate-400 p-4">
+                <p className="text-center">Bạn đã hết lượt thêm mới</p>
+                <p className="text-2xl font-bold text-center"></p>
+                <p className="text-center">trong hôm nay</p>
+              </div>
+          }
+          
           {confessionlist.map((confession) => {
             return (
               <Modal key={confession.id} data={confession}
                 function={
-                  (id:string) => {
+                  (id: string) => {
                     handleDelete(id);
                   }
                 }
