@@ -112,7 +112,7 @@ export default function EditConfession(props: EditConfessionProps) {
     const item = doc(db, "cfs-box", doc_id);
     await deleteDoc(item);
     await updateDoc(doc(db, "users", props.user.uid), {
-      cfs_per_day: props.userdata.cfs_per_day - 1,
+      cfs_per_day: props.userdata.cfs_per_day > 0 ? props.userdata.cfs_per_day - 1 : 0,
       cfs_status: props.userdata.cfs_per_day < 5 ? true : false,
     } as UserData);
     setPending(false);
