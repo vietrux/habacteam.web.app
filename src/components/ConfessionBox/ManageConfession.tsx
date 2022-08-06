@@ -19,6 +19,26 @@ type ModalProps = {
   function: Function;
   isPending: boolean;
 }
+type ManageConfessionProps = {
+  user : User,
+  isSignIn: Function,
+  userdata : UserData,
+}
+type Confession = {
+  id: string;
+  content: string;
+  time: string;
+  uid: string;
+  status: boolean;
+  errormessage: string;
+  errorcode: number;
+  postid: string;
+}
+type UserData = {
+  cfs_per_day: number;
+  cfs_status: boolean;
+  role: string;
+}
 
 function Modal(props: ModalProps) {
 
@@ -112,27 +132,9 @@ function Modal(props: ModalProps) {
     </>
   );
 }
-type ManageConfessionProps = {
-  user : User,
-  isSignIn: Function,
-}
+
 export default function ManageConfession(props:ManageConfessionProps) {
   useDocumentTitle("Quản lý Confession");
-  type Confession = {
-    id: string;
-    content: string;
-    time: string;
-    uid: string;
-    status: boolean;
-    errormessage: string;
-    errorcode: number;
-    postid: string;
-  }
-  type ConfessionBoxUser = {
-    cfs_per_day: number;
-    status: boolean;
-  }
-  const [cfsboxuser, setCfsboxuser] = useState<ConfessionBoxUser>({} as ConfessionBoxUser);
   const [pending, setPending] = useState(false);
   const navigate = useNavigate();
   useEffect(() => {
@@ -141,14 +143,6 @@ export default function ManageConfession(props:ManageConfessionProps) {
     }
   }, [props.user.uid, navigate]);
 
-  useEffect(() => {
-    const unsub = onSnapshot(doc(db, "cfs-box-users", props.user.uid || "a"), (doc) => {
-      setCfsboxuser(doc.data() as ConfessionBoxUser);
-    });
-    return () => {
-      unsub();
-    }
-  }, [props.user.uid]);
 
   const [confessionlist, setConfessionlist] = useState<Array<Confession>>([]);
 
@@ -170,10 +164,10 @@ export default function ManageConfession(props:ManageConfessionProps) {
   async function handleDelete(id: string) {
     setPending(true);
     //delete from firestore
-    await updateDoc(doc(db, "cfs-box-users", props.user.uid), {
-      cfs_per_day: cfsboxuser.cfs_per_day - 1,
-      status: cfsboxuser.cfs_per_day < 5 ? true : false,
-    });
+    await updateDoc(doc(db, "users", props.user.uid), {
+      cfs_per_day: props.userdata.cfs_per_day - 1,
+      cfs_status: props.userdata.cfs_per_day < 5 ? true : false,
+    } as UserData);
     const item = doc(db, "cfs-box", id);
     await deleteDoc(item);
     setPending(false);
@@ -219,7 +213,7 @@ export default function ManageConfession(props:ManageConfessionProps) {
             Nội quy
           </Link>
           {
-            cfsboxuser.status ?
+            props.userdata.cfs_status ?
               <Link to="/u/editcfs/new" className="w-[31%] mx-auto py-2 bg-yellow-300 text-black text-center rounded-lg shadow-lg shadow-slate-300">
                 Thêm mới
               </Link>
@@ -232,10 +226,10 @@ export default function ManageConfession(props:ManageConfessionProps) {
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto p-6 mb-16">
           {
-            cfsboxuser.status ?
+            props.userdata.cfs_status ?
               <div className="grid grid-cols-1 grid-row-3 place-content-center w-full h-full rounded-lg shadow-2xl shadow-slate-400 p-4">
                 <p className="text-center">Bạn còn lại:</p>
-                <p className="text-2xl font-bold text-center">{5 - cfsboxuser.cfs_per_day}</p>
+                <p className="text-2xl font-bold text-center">{5 - props.userdata.cfs_per_day}</p>
                 <p className="text-center">Lượt thêm mới</p>
               </div> :
               <div className="grid grid-cols-1 grid-row-3 place-content-center w-full h-full rounded-lg shadow-2xl shadow-slate-400 p-4">

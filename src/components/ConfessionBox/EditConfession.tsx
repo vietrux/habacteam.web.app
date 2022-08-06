@@ -8,13 +8,15 @@ import useDocumentTitle from "../OtherFunc/useDocumentTitle";
 type EditConfessionProps = {
   user: User,
   isSignIn: Function,
+  userdata: UserData,
 }
-
+type UserData = {
+  cfs_per_day: number,
+  cfs_status: boolean,
+  role: string,
+}
 export default function EditConfession(props: EditConfessionProps) {
-  type ConfessionBoxUser = {
-    cfs_per_day: number;
-    status: boolean;
-  }
+
   type Confession = {
     id: string;
     content: string;
@@ -26,7 +28,6 @@ export default function EditConfession(props: EditConfessionProps) {
     postid: string;
   }
   useDocumentTitle("Thêm cfs");
-  const [cfsboxuser, setCfsboxuser] = useState<ConfessionBoxUser>({} as ConfessionBoxUser);
   const [content, setContent] = useState("");
   const [doc_id, setDoc_id] = useState("");
   const [signal, setSignal] = useState("");
@@ -35,25 +36,14 @@ export default function EditConfession(props: EditConfessionProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    async function getData() {
-      const docRef = doc(db, "cfs-box-users", props.user.uid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setCfsboxuser(docSnap.data() as ConfessionBoxUser);
-        if (!docSnap.data().status) {
-          navigate("/u/cfsbox");
-        }
-      } else {
-        //console.log("Welcome");
-      }
-    }
     if (props.user.uid) {
-      //get user's data from firestore
-      getData()
+      if (!props.userdata.cfs_status){
+        navigate("u/cfsbox")
+      }
     } else {
       navigate("/g/cfsbox");
     }
-  }, [props.user.uid, navigate]);
+  }, [props.user.uid, navigate, props.userdata.cfs_status]);
 
   //get id from url params
   const id = useParams().id;
@@ -95,10 +85,10 @@ export default function EditConfession(props: EditConfessionProps) {
       await updateDoc(item, {
         id: docRef.id,
       } as Confession);
-      await updateDoc(doc(db, "cfs-box-users", props.user.uid), {
-        cfs_per_day: cfsboxuser.cfs_per_day + 1,
-        status: cfsboxuser.cfs_per_day < 5 ? true : false,
-      } as ConfessionBoxUser);
+      await updateDoc(doc(db, "users", props.user.uid), {
+        cfs_per_day: props.userdata.cfs_per_day + 1,
+        cfs_status: props.userdata.cfs_per_day < 5 ? true : false,
+      } as UserData);
       setSignal("Đã thêm mới");
       setPending(false);
       setDoc_id(docRef.id);
@@ -124,10 +114,10 @@ export default function EditConfession(props: EditConfessionProps) {
     //delete from firestore
     const item = doc(db, "cfs-box", doc_id);
     await deleteDoc(item);
-    await updateDoc(doc(db, "cfs-box-users", props.user.uid), {
-      cfs_per_day: cfsboxuser.cfs_per_day - 1,
-      status: cfsboxuser.cfs_per_day < 5 ? true : false,
-    } as ConfessionBoxUser);
+    await updateDoc(doc(db, "users", props.user.uid), {
+      cfs_per_day: props.userdata.cfs_per_day - 1,
+      cfs_status: props.userdata.cfs_per_day < 5 ? true : false,
+    } as UserData);
     setPending(false);
     setSignal("Đã xóa");
   }

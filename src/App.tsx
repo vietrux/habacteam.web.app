@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { db, auth } from './fireConfig';
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, User } from "firebase/auth";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { regular } from '@fortawesome/fontawesome-svg-core/import.macro'
@@ -96,14 +96,16 @@ function App() {
     name: string;
     cod: number;
   }
-  type ConfessionBoxUser = {
+  type UserData = {
     cfs_per_day: number;
-    status: boolean;
+    cfs_status: boolean;
+    role: string;
   }
   //end type
 
   //state --------------------------------------------
   const [user, setUser] = useState<User>({} as User);
+  const [userdata, setUserData] = useState<UserData>({} as UserData);
   const [about, setAbout] = useState("");
   const [fan_count, setFan_count] = useState(0);
   const [feed, setFeed] = useState({} as FeedType);
@@ -116,11 +118,20 @@ function App() {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUser(user);
-      } else {
-        //
       }
     });
   }, []);
+
+  useEffect(() => {
+    if (user.uid) {
+      const unsub = onSnapshot(doc(db, "users", user.uid || "a"), (doc) => {
+        setUserData(doc.data() as UserData);
+      });
+      return () => {
+        unsub();
+      }
+    }
+  }, [user]);
 
   const provider = new GoogleAuthProvider();
 
@@ -128,15 +139,16 @@ function App() {
     async function handleSignIn() {
       signInWithPopup(auth, provider)
         .then(async (result) => {
-          const docRef = doc(db, "cfs-box-users", result.user.uid);
+          const docRef = doc(db, "users", result.user.uid);
           const docSnap = await getDoc(docRef);
           if (docSnap.exists()) {
             // User already exists
           } else {
-            setDoc(doc(db, "cfs-box-users", result.user.uid), {
+            setDoc(doc(db, "users", result.user.uid), {
               cfs_per_day: 0,
-              status: true,
-            } as ConfessionBoxUser);
+              cfs_status: true,
+              role: "guest",
+            } as UserData);
           }
         }).catch((error) => {
           console.log(error.code, error.message);
@@ -212,34 +224,34 @@ function App() {
             <Route path="/u/">
               <Route path="register" element={<Register />} />
               <Route path="total" element={<ListAnswer />} />
-              <Route path="cfsbox" element={<ManageConfession user={user} isSignIn={
-                (value:boolean) => {
+              <Route path="cfsbox" element={<ManageConfession user={user} userdata={userdata} isSignIn={
+                (value: boolean) => {
                   handleSign(value)
                 }
-              }/>} />
-              <Route path="editcfs/:id" element={<EditConfession user={user} isSignIn={
-                (value:boolean) => {
+              } />} />
+              <Route path="editcfs/:id" element={<EditConfession user={user} userdata={userdata} isSignIn={
+                (value: boolean) => {
                   handleSign(value)
                 }
-              }/>} />
+              } />} />
             </Route>
             <Route path='/g/'>
               <Route path="i/">
                 <Route path="departments" element={<Departments />} />
                 <Route path="cfsbox" element={<CfsBoxRule />} />
               </Route>
-              <Route path="cfsbox" element={<ConfessionBox user={user} isSignIn={
-                (value:boolean) => {
+              <Route path="cfsbox" element={<ConfessionBox user={user} userdata={userdata} isSignIn={
+                (value: boolean) => {
                   handleSign(value)
                 }
-              }/>} />
+              } />} />
             </Route>
             <Route path='/a/'>
-              <Route path="cfsbox" element={<ListConfession user={user} isSignIn={
-                (value:boolean) => {
+              <Route path="cfsbox" element={<ListConfession user={user} userdata={userdata} isSignIn={
+                (value: boolean) => {
                   handleSign(value)
                 }
-              }/>} />
+              } />} />
             </Route>
             <Route path='*' element={<NoPage />} />
           </Routes>

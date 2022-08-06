@@ -95,6 +95,12 @@ function Modal(props: ModalProps) {
 type ConfessionBoxProps = {
   user: User,
   isSignIn: Function,
+  userdata: UserData,
+}
+type UserData = {
+  cfs_per_day: number,
+  cfs_status: boolean,
+  role:string,
 }
 export default function ConfessionBox(props:ConfessionBoxProps) {
   useDocumentTitle("Confession Box");
@@ -108,10 +114,7 @@ export default function ConfessionBox(props:ConfessionBoxProps) {
     errorcode: number;
     postid: string;
   }
-
   const [confessionlist, setConfessionlist] = useState<Array<Confession>>([]);
-
-
   useEffect(() => {
     const q = query(collection(db, "cfs-box"), where("status", "==", true));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -169,7 +172,7 @@ export default function ConfessionBox(props:ConfessionBoxProps) {
             </p>
         }
         {
-          props.user.uid && props.user.uid === ("w5fukh4LVlQOxGUMUpjNdDE1ymf2" || "lpODpLtFWLgcuqHZzmmcQWblTzi2") ?
+          props.user.uid && props.userdata.role === "admin" ?
           <Link to="/a/cfsbox" className="w-1/3 block mx-auto py-2 bg-yellow-300 text-black text-center rounded-lg shadow-lg shadow-slate-300">
               Quản lý toàn bộ CfsBox (Admin)
           </Link>

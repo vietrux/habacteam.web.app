@@ -1,7 +1,7 @@
 import { User } from "firebase/auth";
 import { collection, doc, query, getDoc, onSnapshot, updateDoc, deleteDoc } from "firebase/firestore";
 import { db, auth } from "../../fireConfig";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import useDocumentTitle from "../OtherFunc/useDocumentTitle";
 import axios from "axios";
 
@@ -11,7 +11,6 @@ type Value = {
   errormessage: string;
   errorcode: number;
 }
-
 type ModalProps = {
   data: {
     id: string;
@@ -26,6 +25,26 @@ type ModalProps = {
   function: Function;
   value: Value;
   isPending: boolean;
+}
+type ConfessionBoxProps = {
+  user: User,
+  isSignIn: Function,
+  userdata: UserData,
+}
+type Confession = {
+  id: string;
+  content: string;
+  time: string;
+  uid: string;
+  status: boolean;
+  errormessage: string;
+  errorcode: number;
+  postid: string;
+}
+type UserData = {
+  cfs_per_day: number;
+  cfs_status: boolean;
+  role: string;
 }
 
 function Modal(props: ModalProps) {
@@ -152,39 +171,10 @@ function Modal(props: ModalProps) {
     </>
   );
 }
-
-type ConfessionBoxProps = {
-  user: User,
-  isSignIn: Function,
-}
-export default function ConfessionBox(props:ConfessionBoxProps) {
+export default function ConfessionBox(props: ConfessionBoxProps) {
   useDocumentTitle("Quản lý tình trạng của cộng đồng");
-  type Confession = {
-    id: string;
-    content: string;
-    time: string;
-    uid: string;
-    status: boolean;
-    errormessage: string;
-    errorcode: number;
-    postid: string;
-  }
 
   const [pending, setPending] = useState(false);
-  // onAuthStateChanged(auth, (user) => {
-  //   if (user) {
-  //     setUser(user);
-  //     localStorage.setItem("user_uid", user.uid);
-  //     //console.log(user);
-  //   } else {
-  //     // User is signed out
-  //   }
-  // });
-  useEffect(() => {
-    if(props.user.uid){
-      localStorage.setItem("user_uid", props.user.uid);
-    }
-  } , [props.user.uid]);
 
   const [confessionlist, setConfessionlist] = useState<Array<Confession>>([]);
 
@@ -278,30 +268,32 @@ export default function ConfessionBox(props:ConfessionBoxProps) {
         </div>
 
         {
-          props.user.uid !== ("w5fukh4LVlQOxGUMUpjNdDE1ymf2" || "lpODpLtFWLgcuqHZzmmcQWblTzi2") ?
+          props.userdata.role !== "admin" ?
             <p className=" mx-auto py-2 text-center">Bạn phải đăng nhập với tài khoản Admin để sử dụng chức năng này</p> :
             null
         }
 
-        {props.user.uid === "w5fukh4LVlQOxGUMUpjNdDE1ymf2" || "lpODpLtFWLgcuqHZzmmcQWblTzi2" ?
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto p-6 mb-16">
-            {confessionlist.map((confession) => {
-              return (
-                <Modal key={confession.id} data={confession} function={
-                  (valuee: Value) => {
-                    handleUpdateStatus(valuee, confession.content);
-                  }}
-                  value={{
-                    id: confession.id,
-                    status: confession.status,
-                    errormessage: confession.errormessage,
-                    errorcode: confession.errorcode,
-                  } as Value}
-                  isPending={pending}
-                />
-              );
-            })}
-          </div> : null}
+        {
+          props.userdata.role === "admin" ?
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto p-6 mb-16">
+              {confessionlist.map((confession) => {
+                return (
+                  <Modal key={confession.id} data={confession} function={
+                    (valuee: Value) => {
+                      handleUpdateStatus(valuee, confession.content);
+                    }}
+                    value={{
+                      id: confession.id,
+                      status: confession.status,
+                      errormessage: confession.errormessage,
+                      errorcode: confession.errorcode,
+                    } as Value}
+                    isPending={pending}
+                  />
+                );
+              })}
+            </div> : null
+        }
       </div>
     </>
   )

@@ -94,12 +94,12 @@ export default function RightSideBar(props: RightSideBarProps) {
           <p>{props.about}</p>
           <p className="text-right mt-2 italic">- HaBacTeam -</p>
         </div>
-        <Link to="/profile" className="p-8 bg-purple-800 text-lg rounded-2xl shadow-2xl shadow-slate-400 my-4 text-center">
+        <a href="https://www.facebook.com/habacmediaclub" className="p-8 bg-purple-800 text-lg rounded-2xl shadow-2xl shadow-slate-400 my-4 text-center">
           <div className="w-4 inline-block mx-2">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="white"><path d="M504 256C504 119 393 8 256 8S8 119 8 256c0 123.78 90.69 226.38 209.25 245V327.69h-63V256h63v-54.64c0-62.15 37-96.48 93.67-96.48 27.14 0 55.52 4.84 55.52 4.84v61h-31.28c-30.8 0-40.41 19.12-40.41 38.73V256h68.78l-11 71.69h-57.78V501C413.31 482.38 504 379.78 504 256z" /></svg>
           </div>
           <span className="text-white font-bold">Hà Bắc Media Club</span>
-        </Link>
+        </a>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-2 my-4 text-white ">
           <div className="bg-blue-600 rounded-2xl shadow-2xl shadow-slate-400 p-4 py-8">
             <p className="text-center text-lg">Số lượt thích trang</p>
