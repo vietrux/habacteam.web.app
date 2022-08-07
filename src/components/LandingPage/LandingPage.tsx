@@ -32,7 +32,7 @@ export default function DraftLandingpage(props: DraftLandingPageProps) {
     <>
       <div className="overflow-y-auto h-screen ">
         <div className="ml-12 mt-32 sm:mt-8 ">
-          <h1 className="text-2xl sm:text-4xl h-[48px] font-bold mb-[-8px] sm:mb-auto">New Feeds</h1>
+          <h1 className="text-2xl sm:text-4xl h-[48px] font-bold mb-[-8px] sm:mb-auto">News Feed</h1>
           <p className='italic text-sm '>From /habacmediaclub</p>
         </div>
         <div className="mx-12 mb-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 sm:mt-12">
