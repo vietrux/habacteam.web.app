@@ -117,3 +117,7 @@ dist
 /.scannerwork
 # production
 /build
+
+# firebase
+/.firebase
+.firebaserc
