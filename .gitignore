@@ -121,3 +121,5 @@ dist
 # firebase
 /.firebase
 .firebaserc
+firebase.json
+/src/fireConfig.ts
