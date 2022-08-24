@@ -1,24 +1,25 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { regular } from '@fortawesome/fontawesome-svg-core/import.macro';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import axios from 'axios';
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { db, auth } from './fireConfig';
-import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
-import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, User } from "firebase/auth";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { regular } from '@fortawesome/fontawesome-svg-core/import.macro'
-import Logo from "./Assets/LogoWithoutBg.svg"
+import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, User } from "firebase/auth";
+import { doc, getDoc, onSnapshot, setDoc } from "firebase/firestore";
+import { useEffect, useState } from 'react';
+import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+import Logo from "./Assets/LogoWithoutBg.svg";
+import { auth, db } from './fireConfig';
 
-import Landingpage from './components/LandingPage/LandingPage';
+import HMC from './components/LandingPage/HMC';
+import HR from './components/LandingPage/HR';
+import LandingPage from './components/LandingPage/LandingPage';
 import NoPage from './components/NoPage/NoPage';
-import Register from './components/Register/Register';
-import Departments from './components/Infomation/Departments';
-import ListAnswer from './components/Register/ListAnswer';
+// import Register from './components/Register/Register';
 import ConfessionBox from './components/ConfessionBox/ConfessionBox';
-import ManageConfession from './components/ConfessionBox/ManageConfession';
-import CfsBoxRule from './components/Infomation/CfsBox';
 import EditConfession from './components/ConfessionBox/EditConfession';
 import ListConfession from './components/ConfessionBox/ListConfession';
+import ManageConfession from './components/ConfessionBox/ManageConfession';
+import CfsBoxRule from './components/Infomation/CfsBox';
+import Departments from './components/Infomation/Departments';
+import ListAnswer from './components/Register/ListAnswer';
 
 import LeftSideBar from './components/SideBar/LeftSideBar';
 import RightSideBar from './components/SideBar/RightSideBar';
@@ -27,6 +28,7 @@ function App() {
   //type
   type FeedType = {
     data: Array<{
+      attachments?: object,
       message: string;
       permalink: string;
       full_picture: string;
@@ -106,9 +108,12 @@ function App() {
   //state --------------------------------------------
   const [user, setUser] = useState<User>({} as User);
   const [userdata, setUserData] = useState<UserData>({} as UserData);
-  const [about, setAbout] = useState("");
-  const [fan_count, setFan_count] = useState(0);
-  const [feed, setFeed] = useState({} as FeedType);
+  const [hmc_about, setHmcAbout] = useState("");
+  const [hmc_fan_count, setHmcFan_count] = useState(0);
+  const [hmc_feed, setHmcFeed] = useState({} as FeedType);
+  const [hr_about, setHrAbout] = useState("");
+  const [hr_fan_count, setHrFan_count] = useState(0);
+  const [hr_feed, setHrFeed] = useState({} as FeedType);
   const [weather, setWeather] = useState({} as WeatherType);
   const [isopen, setIsopen] = useState(false);
 
@@ -168,12 +173,27 @@ function App() {
   //get facebook data from firebase --------------------------------------------
   useEffect(() => {
     async function getFacebookDataFromFirebase() {
-      const docRef = doc(db, "facebook", "data");
+      const docRef = doc(db, "facebook", "hmc");
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        setAbout(docSnap.data().about)
-        setFan_count(docSnap.data().fan_count)
-        setFeed(docSnap.data().feed)
+        setHmcAbout(docSnap.data().about)
+        setHmcFan_count(docSnap.data().fan_count)
+        setHmcFeed(docSnap.data().feed)
+      }
+    }
+    getFacebookDataFromFirebase();
+  }, []);
+  //end_get facebook data from firebase --------------------------------------------
+
+  //get facebook data from firebase --------------------------------------------
+  useEffect(() => {
+    async function getFacebookDataFromFirebase() {
+      const docRef = doc(db, "facebook", "hr");
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setHrAbout(docSnap.data().about)
+        setHrFan_count(docSnap.data().fan_count)
+        setHrFeed(docSnap.data().feed)
       }
     }
     getFacebookDataFromFirebase();
@@ -209,9 +229,15 @@ function App() {
             <img src={Logo} alt="logo" className="w-1/6 h-auto mx-auto " />
           </div>
           <Routes>
-            <Route path="/" element={<Landingpage feed={feed} />} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/hmc" element={<HMC feed={hmc_feed} />} />
+            <Route path="/hr" element={<HR feed={hr_feed} />} />
             <Route path="/u/">
-              <Route path="register" element={<Register />} />
+              <Route path="register" element={
+                <div className="w-full h-screen grid content-center text-center px-4 bg-white">
+                  Xin lỗi, đã hết đợt đăng ký. Vui lòng quay lại sau.
+                </div>
+              } />
               <Route path="total" element={<ListAnswer />} />
               <Route path="cfsbox" element={<ManageConfession user={user} userdata={userdata} isSignIn={
                 (value: boolean) => {
@@ -245,7 +271,7 @@ function App() {
             <Route path='*' element={<NoPage />} />
           </Routes>
         </div>
-        <RightSideBar weather={weather} about={about} fan_count={fan_count} isopen={isopen} />
+        <RightSideBar weather={weather} about={hmc_about} fan_count={{hmc_fan_count,hr_fan_count}} isopen={isopen} />
         <div className="fixed inset-x-0 bottom-0 z-10 bg-white shadow-2xl shadow-slate-500 block sm:hidden rounded-lg">
           <div className="px-4 sm:p-6 flex justify-around">
             <Link to="/" onClick={
@@ -253,23 +279,31 @@ function App() {
                 setIsopen(false)
               }
             } className="my-2 p-2 text-slate-600 hover:text-green-900 font-semibold text-center">
-              <FontAwesomeIcon icon={regular('compass')} size="lg" />
+              <i className="fa-regular fa-house fa-lg"></i>
               <p className="text-[12px] font-normal">Trang chủ</p>
             </Link>
-            <Link to="/u/register" onClick={
+            <Link to="/hmc" onClick={
               () => {
                 setIsopen(false)
               }
             } className="my-2 p-2 text-slate-600 hover:text-green-900 font-semibold text-center">
-              <FontAwesomeIcon icon={regular('address-card')} size="lg" />
-              <p className="text-[12px] font-normal">Đăng ký</p>
+              <i className="fa-regular fa-photo-film-music"></i>
+              <p className="text-[12px] font-normal">Hmc</p>
+            </Link>
+            <Link to="/hr" onClick={
+              () => {
+                setIsopen(false)
+              }
+            } className="my-2 p-2 text-slate-600 hover:text-green-900 font-semibold text-center">
+              <i className="fa-regular fa-radio fa-lg"></i>
+              <p className="text-[12px] font-normal">Hr</p>
             </Link>
             <Link to="/g/cfsbox" onClick={
               () => {
                 setIsopen(false)
               }
             } className="my-2 p-2 text-slate-600 hover:text-green-900 font-semibold text-center">
-              <FontAwesomeIcon icon={regular('comments')} size="lg" />
+              <i className="fa-regular fa-messages fa-lg"></i>
               <p className="text-[12px] font-normal">Confession Box</p>
             </Link>
             <button onClick={

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import useDocumentTitle from "../OtherFunc/useDocumentTitle"
+import useDocumentTitle from "../OtherFunc/useDocumentTitle";
 export default function Departments() {
   useDocumentTitle("Các ban trong HMC");
   return (

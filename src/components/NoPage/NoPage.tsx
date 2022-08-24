@@ -1,4 +1,4 @@
-import useDocumentTitle from "../OtherFunc/useDocumentTitle"
+import useDocumentTitle from "../OtherFunc/useDocumentTitle";
 export default function NoPage() {
   useDocumentTitle("404");
   return (

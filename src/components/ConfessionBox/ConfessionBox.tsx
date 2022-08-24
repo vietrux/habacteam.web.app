@@ -1,8 +1,9 @@
 import { User } from "firebase/auth";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
-import { db, auth } from "../../fireConfig";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
+import { animal_list, color_list } from "../../Assets/zoo";
+import { auth, db } from "../../fireConfig";
 import useDocumentTitle from "../OtherFunc/useDocumentTitle";
 
 type ModalProps = {
@@ -25,7 +26,7 @@ type ConfessionBoxProps = {
 type UserData = {
   cfs_per_day: number,
   cfs_status: boolean,
-  role:string,
+  role: string,
 }
 type Confession = {
   id: string;
@@ -113,9 +114,11 @@ function Modal(props: ModalProps) {
   );
 }
 
-export default function ConfessionBox(props:ConfessionBoxProps) {
+export default function ConfessionBox(props: ConfessionBoxProps) {
   useDocumentTitle("Confession Box");
   const [confessionlist, setConfessionlist] = useState<Array<Confession>>([]);
+  const [animal, setAnimal] = useState<string>("");
+  const [color, setColor] = useState<string>("");
   useEffect(() => {
     const q = query(collection(db, "cfs-box"), where("status", "==", true));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -129,18 +132,34 @@ export default function ConfessionBox(props:ConfessionBoxProps) {
       unsubscribe();
     }
   }, []);
+  useEffect(() => {
+    const random = Math.floor(Math.random() * animal_list.length);
+    setAnimal(animal_list[random]);
+  }, []);
+  useEffect(() => {
+    const random = Math.floor(Math.random() * color_list.length);
+    setColor(color_list[random]);
+  }, []);
   return (
     <>
       <div className="w-full h-screen overflow-y-auto">
         <div className="flex items-center justify-around w-full mt-32 sm:mt-8 mb-8">
-          <div className="text-2xl sm:text-4xl font-bold self-center">Confession Box</div>
+          <div className="text-2xl sm:text-4xl font-bold self-center text-center">Confession Box</div>
           <div className="self-center flex items-center">
             {auth.currentUser ?
               <div className="inline-flex">
                 <div className="flex items-center space-x-4">
-                  <img className="w-10 h-10 rounded-full" src={props.user?.photoURL || ""} alt="" />
+                  <div className="w-10 h-10 rounded-full border-[2px] border-blue-500">
+                    <img src={`https://ssl.gstatic.com/docs/common/profile/${animal}_lg.png`} alt="avatar" className="w-full h-full rounded-full"
+                      style={{
+                        backgroundColor: color,
+                        borderColor: "white",
+                        borderWidth: "1px"
+                      }}
+                    />
+                  </div>
                   <div className="font-medium ">
-                    <div>{props.user.displayName}</div>
+                    <div className="capitalize">{animal} ẩn danh</div>
                     <button
                       onClick={
                         () => {
@@ -163,22 +182,23 @@ export default function ConfessionBox(props:ConfessionBoxProps) {
           </div>
         </div>
         <div className="flex">
-        {
-          props.user.uid ?
-            <Link to="/u/cfsbox" className="w-1/3 block mx-auto py-2 bg-yellow-300 text-black text-center rounded-lg shadow-lg shadow-slate-300">
-              Quản lý CfsBox của bạn
-            </Link>
-            : <p className=" mx-auto py-2 text-center">
-              Đăng nhập để viết confession
-            </p>
-        }
-        {
-          props.user.uid && props.userdata.role === "admin" ?
-          <Link to="/a/cfsbox" className="w-1/3 block mx-auto py-2 bg-yellow-300 text-black text-center rounded-lg shadow-lg shadow-slate-300">
-              Quản lý toàn bộ CfsBox (Admin)
-          </Link>
-          : null
-        }
+          {
+            props.user.uid ?
+              <Link to="/u/cfsbox" className="w-1/3 block mx-auto py-2 bg-yellow-300 text-black text-center rounded-lg shadow-lg shadow-slate-300">
+                Quản lý CfsBox của bạn
+              </Link>
+              :
+              <Link to="/g/i/cfsbox" className="w-1/3 mx-auto py-2 bg-yellow-300 text-center rounded-lg shadow-lg shadow-slate-300">
+                Quy định
+              </Link>
+          }
+          {
+            props.user.uid && props.userdata.role === "admin" ?
+              <Link to="/a/cfsbox" className="w-1/3 block mx-auto py-2 bg-yellow-300 text-black text-center rounded-lg shadow-lg shadow-slate-300">
+                Quản lý toàn bộ CfsBox (Admin)
+              </Link>
+              : null
+          }
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto p-6 mb-16">
           {confessionlist.map((confession) => {

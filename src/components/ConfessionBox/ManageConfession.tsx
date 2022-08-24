@@ -1,8 +1,9 @@
 import { User } from "firebase/auth";
-import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
-import { db, auth } from "../../fireConfig";
+import { collection, deleteDoc, doc, onSnapshot, query, updateDoc, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from 'react-router-dom';
+import { animal_list, color_list } from "../../Assets/zoo";
+import { auth, db } from "../../fireConfig";
 import useDocumentTitle from "../OtherFunc/useDocumentTitle";
 
 type ModalProps = {
@@ -20,9 +21,9 @@ type ModalProps = {
   isPending: boolean;
 }
 type ManageConfessionProps = {
-  user : User,
+  user: User,
   isSignIn: Function,
-  userdata : UserData,
+  userdata: UserData,
 }
 type Confession = {
   id: string;
@@ -86,13 +87,14 @@ function Modal(props: ModalProps) {
                   </h3>
                   {
                     props.data.status ?
-                      null : <button
-                        onClick={
-                          () => {
-                            props.function(props.data.id);
-                          }
-                        }
-                        className="text-xl font-semibold">Xóa</button>
+                      null : 
+                      <Link to={`/u/editcfs/${props.data.id}`}
+                        // onClick={
+                        //   () => {
+                        //     props.function(props.data.id);
+                        //   }
+                        // }
+                        className="text-xl font-semibold">Sửa</Link>
                   }
                 </div>
                 {/*body*/}
@@ -133,9 +135,11 @@ function Modal(props: ModalProps) {
   );
 }
 
-export default function ManageConfession(props:ManageConfessionProps) {
+export default function ManageConfession(props: ManageConfessionProps) {
   useDocumentTitle("Quản lý Confession");
   const [pending, setPending] = useState(false);
+  const [animal, setAnimal] = useState<string>("");
+  const [color, setColor] = useState<string>("");
   const navigate = useNavigate();
   useEffect(() => {
     if (!props.user.uid) {
@@ -164,12 +168,21 @@ export default function ManageConfession(props:ManageConfessionProps) {
     //delete from firestore
     await updateDoc(doc(db, "users", props.user.uid), {
       cfs_per_day: props.userdata.cfs_per_day > 0 ? props.userdata.cfs_per_day - 1 : 0,
-      cfs_status: props.userdata.cfs_per_day < 5 ? true : false,
+      cfs_status: props.userdata.cfs_per_day - 1 < 3 ? true : false,
     } as UserData);
     const item = doc(db, "cfs-box", id);
     await deleteDoc(item);
     setPending(false);
   }
+
+  useEffect(() => {
+    const random = Math.floor(Math.random() * animal_list.length);
+    setAnimal(animal_list[random]);
+  }, []);
+  useEffect(() => {
+    const random = Math.floor(Math.random() * color_list.length);
+    setColor(color_list[random]);
+  }, []);
   return (
     <>
       <div className="w-full h-screen overflow-y-auto">
@@ -179,9 +192,17 @@ export default function ManageConfession(props:ManageConfessionProps) {
             {auth.currentUser ?
               <div className="inline-flex">
                 <div className="flex items-center space-x-4">
-                  <img className="w-10 h-10 rounded-full" src={props.user?.photoURL || ""} alt="" />
+                  <div className="w-10 h-10 rounded-full border-[2px] border-blue-500">
+                    <img src={`https://ssl.gstatic.com/docs/common/profile/${animal}_lg.png`} alt="avatar" className="w-full h-full rounded-full"
+                      style={{
+                        backgroundColor: color,
+                        borderColor: "white",
+                        borderWidth: "1px"
+                      }}
+                    />
+                  </div>
                   <div className="font-medium ">
-                    <div>{props.user.displayName}</div>
+                    <div className="capitalize">{animal} ẩn danh</div>
                     <button
                       onClick={
                         () => {
@@ -208,14 +229,14 @@ export default function ManageConfession(props:ManageConfessionProps) {
             Quay về
           </Link>
           <Link to="/g/i/cfsbox" className="w-[31%] mx-auto py-2 bg-yellow-300 text-center rounded-lg shadow-lg shadow-slate-300">
-            Nội quy
+            Quy định
           </Link>
           {
             props.userdata.cfs_status ?
               <Link to="/u/editcfs/new" className="w-[31%] mx-auto py-2 bg-yellow-300 text-black text-center rounded-lg shadow-lg shadow-slate-300">
                 Thêm mới
               </Link>
-              : 
+              :
               <button className="w-[31%] mx-auto py-2 bg-yellow-300 text-black text-center rounded-lg shadow-lg shadow-slate-300 cursor-not-allowed disabled:bg-yellow-200 disabled:text-slate-500" disabled>
                 Thêm mới
               </button>
@@ -227,7 +248,7 @@ export default function ManageConfession(props:ManageConfessionProps) {
             props.userdata.cfs_status ?
               <div className="grid grid-cols-1 grid-row-3 place-content-center w-full h-full rounded-lg shadow-2xl shadow-slate-400 p-4">
                 <p className="text-center">Bạn còn lại:</p>
-                <p className="text-2xl font-bold text-center">{5 - props.userdata.cfs_per_day}</p>
+                <p className="text-2xl font-bold text-center">{3 - props.userdata.cfs_per_day}</p>
                 <p className="text-center">Lượt thêm mới</p>
               </div> :
               <div className="grid grid-cols-1 grid-row-3 place-content-center w-full h-full rounded-lg shadow-2xl shadow-slate-400 p-4">
@@ -236,7 +257,7 @@ export default function ManageConfession(props:ManageConfessionProps) {
                 <p className="text-center">trong hôm nay</p>
               </div>
           }
-          
+
           {confessionlist.map((confession) => {
             return (
               <Modal key={confession.id} data={confession}

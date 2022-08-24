@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
-import { list_question } from "../../Assets/list_question";
-import AnswerElement from "./AnswerElement";
-import { Link } from "react-router-dom";
 import { detectIncognito } from "detect-incognito";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { list_question } from "../../Assets/list_question";
 import useDocumentTitle from "../OtherFunc/useDocumentTitle";
+import AnswerElement from "./AnswerElement";
 
+import { addDoc, collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../../fireConfig";
-import { collection, addDoc, getDoc, doc, setDoc } from "firebase/firestore";
 
 export default function Register() {
 
@@ -21,7 +21,7 @@ export default function Register() {
     contactMethod: string;
     contactInfo: string;
   }
-  const listkey = ["name", "yob", "class",  "freetime", "departments", "more", "contactMethod", "contactInfo"];
+  const listkey = ["name", "yob", "class", "freetime", "departments", "more", "contactMethod", "contactInfo"];
   const [formData, setFormData] = useState<FormDataObject>({
     time: new Date().toLocaleString(),
     name: "",
@@ -57,7 +57,7 @@ export default function Register() {
     }
     checkincognito();
   }, []);
-  
+
   async function handleSubmit() {
     if (!res_id) {
       formData.time = new Date().toLocaleString();
@@ -140,9 +140,9 @@ export default function Register() {
                     }
                   }
                   }>{
-                    ques_id === listkey.length - 1 ? 
+                    ques_id === listkey.length - 1 ?
                       localStorage.getItem("res_register_form_id") ? "Cập nhật" : "Đăng ký"
-                     : "Tiếp theo"
+                      : "Tiếp theo"
                   }</button>)
                   : (<></>)
               }

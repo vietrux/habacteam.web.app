@@ -1,6 +1,6 @@
+import { collection, onSnapshot, query } from "firebase/firestore";
+import { useEffect, useState } from "react";
 import { db } from "../../fireConfig";
-import { collection, query, onSnapshot } from "firebase/firestore";
-import { useState, useEffect } from "react";
 import useDocumentTitle from "../OtherFunc/useDocumentTitle";
 export default function ListAnswer() {
 

@@ -1,10 +1,11 @@
-import { User } from "firebase/auth";
-import { collection, doc, query, getDoc, onSnapshot, updateDoc, deleteDoc } from "firebase/firestore";
-import { db, auth } from "../../fireConfig";
-import { useEffect, useState } from "react";
-import useDocumentTitle from "../OtherFunc/useDocumentTitle";
 import axios from "axios";
+import { User } from "firebase/auth";
+import { collection, deleteDoc, doc, getDoc, onSnapshot, query, updateDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { animal_list, color_list } from "../../Assets/zoo";
+import { auth, db } from "../../fireConfig";
+import useDocumentTitle from "../OtherFunc/useDocumentTitle";
 
 type Value = {
   id: string;
@@ -51,6 +52,8 @@ type UserData = {
 function Modal(props: ModalProps) {
   const [showModal, setShowModal] = useState(false);
   const [index, setIndex] = useState(props.value.errorcode);
+  const [content, setContent] = useState(props.data.content);
+
   const listoption = [
     {
       id: props.value.id,
@@ -71,6 +74,29 @@ function Modal(props: ModalProps) {
       errorcode: 2,
     }
   ]
+  useEffect(() => {
+    async function CheckSpell(content: string) {
+      const res = await axios.get("https://vietnamesespellchecker.vietrux.workers.dev/", {
+        params: {
+          content: content,
+        }
+      })
+      const list_badword = res.data.result as string[]; 
+      const content2 = props.data.content
+      const contents = content2.toLowerCase().replaceAll("\n"," \n ").split(" ");
+      var str = "";
+      for (let i = 0; i < contents.length; i++) {
+        if (list_badword.includes(contents[i])) {
+          contents[i] = "<span style='background-color: yellow'>" + contents[i] + "</span>";
+        }
+        str += contents[i] + " ";
+      }
+      setContent(str);
+    }
+    if (showModal){
+      CheckSpell(props.data.content);
+    }
+  }, [showModal]);
   return (
     <>
       <div className="rounded-lg shadow-2xl shadow-slate-400">
@@ -125,9 +151,10 @@ function Modal(props: ModalProps) {
                 </div>
                 {/*body*/}
                 <div className="relative p-3 flex-auto">
-                  <p style={{ whiteSpace: "pre-line" }} className="h-36 my-1 text-slate-900 text-lg leading-relaxed overflow-y-auto scrollbar">
-                    {props.data.content}
-                  </p>
+                  
+                  <div style={{ whiteSpace: "pre-line" }} className="h-36 my-1 text-slate-900 text-lg leading-relaxed overflow-y-auto scrollbar" dangerouslySetInnerHTML={{ __html: content }}></div>
+                  
+                  
                 </div>
                 {/*footer*/}
                 <div className="flex items-center justify-between p-6 border-t border-solid border-slate-200 rounded-b">
@@ -174,6 +201,8 @@ export default function ListConfession(props: ConfessionBoxProps) {
   useDocumentTitle("Quản lý tình trạng của cộng đồng");
   const [pending, setPending] = useState(false);
   const [confessionlist, setConfessionlist] = useState<Array<Confession>>([]);
+  const [animal, setAnimal] = useState<string>("");
+  const [color, setColor] = useState<string>("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -236,7 +265,14 @@ export default function ListConfession(props: ConfessionBoxProps) {
         break;
     }
   }
-
+  useEffect(() => {
+    const random = Math.floor(Math.random() * animal_list.length);
+    setAnimal(animal_list[random]);
+  }, []);
+  useEffect(() => {
+    const random = Math.floor(Math.random() * color_list.length);
+    setColor(color_list[random]);
+  }, []);
   return (
     <>
       <div className="w-full h-screen overflow-y-auto">
@@ -246,9 +282,17 @@ export default function ListConfession(props: ConfessionBoxProps) {
             {auth.currentUser ?
               <div className="inline-flex">
                 <div className="flex items-center space-x-4">
-                  <img className="w-10 h-10 rounded-full" src={props.user?.photoURL || ""} alt="" />
+                  <div className="w-10 h-10 rounded-full border-[2px] border-blue-500">
+                    <img src={`https://ssl.gstatic.com/docs/common/profile/${animal}_lg.png`} alt="avatar" className="w-full h-full rounded-full"
+                      style={{
+                        backgroundColor: color,
+                        borderColor: "white",
+                        borderWidth: "1px"
+                      }}
+                    />
+                  </div>
                   <div className="font-medium ">
-                    <div>{props.user.displayName}</div>
+                    <div className="capitalize">{animal} ẩn danh</div>
                     <button
                       onClick={
                         () => {
