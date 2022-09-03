@@ -184,7 +184,7 @@ export default function ConfessionBox(props: ConfessionBoxProps) {
         <div className="flex">
           {
             props.user.uid ?
-              <Link to="/u/cfsbox" className="w-1/3 block mx-auto py-2 bg-[#bc6cc0] text-white text-black text-center rounded-lg shadow-lg shadow-slate-300">
+              <Link to="/u/cfsbox" className="w-1/3 block mx-auto py-2 bg-[#bc6cc0] text-white text-center rounded-lg shadow-lg shadow-slate-300">
                 CfsBox của bạn
               </Link>
               :
@@ -194,7 +194,7 @@ export default function ConfessionBox(props: ConfessionBoxProps) {
           }
           {
             props.user.uid && props.userdata.role === "admin" ?
-              <Link to="/a/cfsbox" className="w-1/3 block mx-auto py-2 bg-[#bc6cc0] text-white text-black text-center rounded-lg shadow-lg shadow-slate-300">
+              <Link to="/a/cfsbox" className="w-1/3 block mx-auto py-2 bg-[#bc6cc0] text-white text-center rounded-lg shadow-lg shadow-slate-300">
                 Quản lý (Admin)
               </Link>
               : null

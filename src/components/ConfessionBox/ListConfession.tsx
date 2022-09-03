@@ -257,7 +257,7 @@ export default function ListConfession(props: ConfessionBoxProps) {
         setPending(true);
         if (docSnap.exists()) {
           const respost = await axios.post(`https://graph.facebook.com/100670066088031/feed?access_token=${docSnap.data().access_token}`, {
-            message: `#habac_cfs+${countCfs+1}\n${content}\n#habacteam`,
+            message: `#habac_cfs_${countCfs+1}\n${content}`,
           });
           updateDoc(item, {
             status: value.status,
