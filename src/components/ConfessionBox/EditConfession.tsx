@@ -2,7 +2,6 @@ import { User } from "firebase/auth";
 import { addDoc, collection, deleteDoc, doc, getDoc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import Reaptcha from 'reaptcha';
 import { bad_words } from "../../Assets/bad_words";
 import { db } from "../../fireConfig";
 import useDocumentTitle from "../OtherFunc/useDocumentTitle";
@@ -231,7 +230,7 @@ export default function EditConfession(props: EditConfessionProps) {
               :
               <>
                 {
-                  recaptcha && content.length > 0 ?
+                  content.length > 0 ?
                     <button onClick={
                       doc_id ? handleUpdate : handleAdd
                     }
@@ -261,21 +260,6 @@ export default function EditConfession(props: EditConfessionProps) {
             }
             <p className="text-blue-500 mt-4 mb-2">{signal}</p>
             <p className="text-red-500 mt-4 mb-2">{error}</p>
-
-            <Reaptcha
-              hl="vi"
-              className={showcaptcha ? "block" : "hidden"}
-              onExpire={() => {
-                setShowcaptcha(false);
-              }}
-              sitekey="6LfEeWIhAAAAAGMTli0lH94oJ2ocSEXzOf8pqWZq"
-              onVerify={
-                (value: any) => {
-                  if (value) {
-                    setRecaptcha(true);
-                  }
-                }
-              } />
           </form>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { User } from "firebase/auth";
-import { collection, deleteDoc, doc, getDoc, onSnapshot, query, updateDoc, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { animal_list, color_list } from "../../Assets/zoo";
@@ -81,9 +81,9 @@ function Modal(props: ModalProps) {
           content: content,
         }
       })
-      const list_badword = res.data.result as string[]; 
+      const list_badword = res.data.result as string[];
       const content2 = props.data.content
-      const contents = content2.toLowerCase().replaceAll("\n"," \n ").split(" ");
+      const contents = content2.toLowerCase().replaceAll("\n", " \n ").split(" ");
       var str = "";
       for (let i = 0; i < contents.length; i++) {
         if (list_badword.includes(contents[i])) {
@@ -93,7 +93,7 @@ function Modal(props: ModalProps) {
       }
       setContent(str);
     }
-    if (showModal){
+    if (showModal) {
       CheckSpell(props.data.content);
     }
   }, [showModal]);
@@ -122,78 +122,80 @@ function Modal(props: ModalProps) {
             setShowModal(true);
           }
         }
-          className={`text-white p-2 rounded-b-lg w-full bg-orange-800`}
+          className={props.data.errormessage ? "bg-[#606c38] text-white p-2 rounded-b-lg w-full" : props.data.status ? "bg-[#FEC89A] p-2 rounded-b-lg w-full" : "bg-[#606c38] text-white p-2 rounded-b-lg w-full"}
         >Xem chi tiết</button>
-      </div>
-      {showModal ? (
-        <>
-          <div
-            className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none"
-          >
-            <div className="relative my-6 mx-auto w-[90%] sm:w-[65%]">
-              {/*content*/}
-              <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
-                {/*header*/}
-                <div className="flex items-center justify-between p-5 border-b border-solid border-slate-300 rounded-t">
-                  <h3 className="text-xl font-semibold">
-                    {props.data.errormessage ? "Vi phạm" : props.data.status ? "Đã xác nhận" : "Chưa xác nhận"}
-                  </h3>
-                  {
-                    props.data.status ?
-                      null : <button
-                        onClick={
-                          () => {
-                            props.function(listoption[2]);
-                          }
+    </div>
+      {
+    showModal ? (
+      <>
+        <div
+          className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none"
+        >
+          <div className="relative my-6 mx-auto w-[90%] sm:w-[65%]">
+            {/*content*/}
+            <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
+              {/*header*/}
+              <div className="flex items-center justify-between p-5 border-b border-solid border-slate-300 rounded-t">
+                <h3 className="text-xl font-semibold">
+                  {props.data.errormessage ? "Vi phạm" : props.data.status ? "Đã xác nhận" : "Chưa xác nhận"}
+                </h3>
+                {
+                  props.data.status ?
+                    null : <button
+                      onClick={
+                        () => {
+                          props.function(listoption[2]);
                         }
-                        className="text-xl font-semibold">Xóa</button>
-                  }
-                </div>
-                {/*body*/}
-                <div className="relative p-3 flex-auto">
-                  
-                  <div style={{ whiteSpace: "pre-line" }} className="h-36 my-1 text-slate-900 text-lg leading-relaxed overflow-y-auto scrollbar" dangerouslySetInnerHTML={{ __html: content }}></div>
-                  
-                  
-                </div>
-                {/*footer*/}
-                <div className="flex items-center justify-between p-6 border-t border-solid border-slate-200 rounded-b">
-                  <select
-                    className={
-                      props.isPending ? "mr-4 p-2 bg-white border border-gray-300 rounded-lg shadow-sm opacity-50 cursor-not-allowed" : "mr-4 p-2 bg-white border border-gray-300 rounded-lg shadow-sm"
+                      }
+                      className="text-xl font-semibold">Xóa</button>
+                }
+              </div>
+              {/*body*/}
+              <div className="relative p-3 flex-auto">
 
-                    }
-                    value={listoption[index].errorcode}
-                    onChange={(e) => {
-                      setIndex(parseInt(e.target.value) as number);
-                      props.function(listoption[parseInt(e.target.value) as number]);
-                    }
-                    }>
-                    <option disabled>Chọn trạng thái</option>
-                    <option value="0">Ẩn cfs</option>
-                    <option value="1">Duyệt cfs</option>
-                  </select>
-                  {
-                    props.isPending ?
-                      <button onClick={() => setShowModal(false)} type="button" className="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition ease-in-out duration-150 cursor-not-allowed" disabled>
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Đang xử lý...
-                      </button>
-                      :
-                      <button onClick={() => setShowModal(false)} type="button" className="inline-flex items-center px-8 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition ease-in-out duration-150 ">
-                        Đóng
-                      </button>
+                <div style={{ whiteSpace: "pre-line" }} className="h-36 my-1 text-slate-900 text-lg leading-relaxed overflow-y-auto scrollbar" dangerouslySetInnerHTML={{ __html: content }}></div>
+
+
+              </div>
+              {/*footer*/}
+              <div className="flex items-center justify-between p-6 border-t border-solid border-slate-200 rounded-b">
+                <select
+                  className={
+                    props.isPending ? "mr-4 p-2 bg-white border border-gray-300 rounded-lg shadow-sm opacity-50 cursor-not-allowed" : "mr-4 p-2 bg-white border border-gray-300 rounded-lg shadow-sm"
+
                   }
-                </div>
+                  value={listoption[index].errorcode}
+                  onChange={(e) => {
+                    setIndex(parseInt(e.target.value) as number);
+                    props.function(listoption[parseInt(e.target.value) as number]);
+                  }
+                  }>
+                  <option disabled>Chọn trạng thái</option>
+                  <option value="0">Ẩn cfs</option>
+                  <option value="1">Duyệt cfs</option>
+                </select>
+                {
+                  props.isPending ?
+                    <button onClick={() => setShowModal(false)} type="button" className="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition ease-in-out duration-150 cursor-not-allowed" disabled>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Đang xử lý...
+                    </button>
+                    :
+                    <button onClick={() => setShowModal(false)} type="button" className="inline-flex items-center px-8 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition ease-in-out duration-150 ">
+                      Đóng
+                    </button>
+                }
               </div>
             </div>
           </div>
-          <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
-        </>
-      ) : null}
+        </div>
+        <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
+      </>
+    ) : null
+  }
     </>
   );
 }
@@ -213,7 +215,7 @@ export default function ListConfession(props: ConfessionBoxProps) {
   }, [props.user.uid, navigate]);
 
   useEffect(() => {
-    const q = query(collection(db, "cfs-box"));
+    const q = query(collection(db, "cfs-box"), orderBy("time", "desc"));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const confessions = [] as Array<Confession>;
       querySnapshot.forEach((doc) => {
@@ -257,7 +259,7 @@ export default function ListConfession(props: ConfessionBoxProps) {
         setPending(true);
         if (docSnap.exists()) {
           const respost = await axios.post(`https://graph.facebook.com/100670066088031/feed?access_token=${docSnap.data().access_token}`, {
-            message: `#habac_cfs_${countCfs+1}\n${content}`,
+            message: `#habac_cfs_${countCfs + 1}\n${content}`,
           });
           updateDoc(item, {
             status: value.status,

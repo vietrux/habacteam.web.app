@@ -1,5 +1,5 @@
 import { User } from "firebase/auth";
-import { collection, deleteDoc, doc, onSnapshot, query, updateDoc, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import { animal_list, color_list } from "../../Assets/zoo";
@@ -150,7 +150,7 @@ export default function ManageConfession(props: ManageConfessionProps) {
   const [confessionlist, setConfessionlist] = useState<Array<Confession>>([]);
 
   useEffect(() => {
-    const q = query(collection(db, "cfs-box"), where("uid", "==", props.user.uid || ""));
+    const q = query(collection(db, "cfs-box"), where("uid", "==", props.user.uid || ""), orderBy("time", "desc"));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const confessions = [] as Array<Confession>;
       querySnapshot.forEach((doc) => {

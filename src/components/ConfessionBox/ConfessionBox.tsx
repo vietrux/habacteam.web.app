@@ -1,5 +1,5 @@
 import { User } from "firebase/auth";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import { animal_list, color_list } from "../../Assets/zoo";
@@ -120,7 +120,7 @@ export default function ConfessionBox(props: ConfessionBoxProps) {
   const [animal, setAnimal] = useState<string>("");
   const [color, setColor] = useState<string>("");
   useEffect(() => {
-    const q = query(collection(db, "cfs-box"), where("status", "==", true));
+    const q = query(collection(db, "cfs-box"), where("status", "==", true), orderBy("time", "desc"));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const confessions = [] as Array<Confession>;
       querySnapshot.forEach((doc) => {
