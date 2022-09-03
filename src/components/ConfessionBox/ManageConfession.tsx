@@ -146,9 +146,6 @@ export default function ManageConfession(props: ManageConfessionProps) {
     });
     if (props.userdata.last_cf_time !== datenow) {
       update_cfs_per_day();
-      console.log("vcl update");
-      console.log(props.userdata.last_cf_time);
-      console.log(datenow);
     }
   }, []);
 
