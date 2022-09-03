@@ -1,5 +1,5 @@
 import { User } from "firebase/auth";
-import { collection, deleteDoc, doc, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
+import { collection, doc, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import { animal_list, color_list } from "../../Assets/zoo";
@@ -16,9 +16,7 @@ type ModalProps = {
     errormessage: string;
     errorcode: number;
     postid: string;
-  }
-  function: Function;
-  isPending: boolean;
+  };
 }
 type ManageConfessionProps = {
   user: User,
@@ -39,6 +37,7 @@ type UserData = {
   cfs_per_day: number;
   cfs_status: boolean;
   role: string;
+  last_cf_time?: string;
 }
 
 function Modal(props: ModalProps) {
@@ -87,14 +86,9 @@ function Modal(props: ModalProps) {
                   </h3>
                   {
                     props.data.status ?
-                      null : 
+                      null :
                       <Link to={`/u/editcfs/${props.data.id}`}
-                        // onClick={
-                        //   () => {
-                        //     props.function(props.data.id);
-                        //   }
-                        // }
-                        className="text-xl font-semibold">Sửa</Link>
+                        className="text-xl font-semibold">Chỉnh sửa</Link>
                   }
                 </div>
                 {/*body*/}
@@ -110,20 +104,9 @@ function Modal(props: ModalProps) {
                     :
                     <>Không có bài viết trên Facebook</>
                   }
-                  {
-                    props.isPending ?
-                      <button onClick={() => setShowModal(false)} type="button" className="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition ease-in-out duration-150 cursor-not-allowed" disabled>
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Đang xử lý...
-                      </button>
-                      :
-                      <button onClick={() => setShowModal(false)} type="button" className="inline-flex items-center px-8 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition ease-in-out duration-150 ">
-                        Đóng
-                      </button>
-                  }
+                  <button onClick={() => setShowModal(false)} type="button" className="inline-flex items-center px-8 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition ease-in-out duration-150 ">
+                    Đóng
+                  </button>
                 </div>
               </div>
             </div>
@@ -137,7 +120,6 @@ function Modal(props: ModalProps) {
 
 export default function ManageConfession(props: ManageConfessionProps) {
   useDocumentTitle("Quản lý Confession");
-  const [pending, setPending] = useState(false);
   const [animal, setAnimal] = useState<string>("");
   const [color, setColor] = useState<string>("");
   const navigate = useNavigate();
@@ -148,6 +130,27 @@ export default function ManageConfession(props: ManageConfessionProps) {
   }, [props.user.uid, navigate]);
 
   const [confessionlist, setConfessionlist] = useState<Array<Confession>>([]);
+
+  useEffect(() => {
+    async function update_cfs_per_day(){
+      await updateDoc(doc(db, "users", props.user.uid), {
+        cfs_per_day: 0,
+        cfs_status: true,
+      } as UserData);
+    }
+    const datenow = new Date().toLocaleString("en-US", {
+      hour12: false,
+      day: "numeric",
+      month: "numeric",
+      year: "numeric",
+    });
+    if (props.userdata.last_cf_time !== datenow) {
+      update_cfs_per_day();
+      console.log("vcl update");
+      console.log(props.userdata.last_cf_time);
+      console.log(datenow);
+    }
+  }, []);
 
   useEffect(() => {
     const q = query(collection(db, "cfs-box"), where("uid", "==", props.user.uid || ""), orderBy("time", "desc"));
@@ -162,18 +165,6 @@ export default function ManageConfession(props: ManageConfessionProps) {
       unsubscribe();
     }
   }, [props.user]);
-
-  async function handleDelete(id: string) {
-    setPending(true);
-    //delete from firestore
-    await updateDoc(doc(db, "users", props.user.uid), {
-      cfs_per_day: props.userdata.cfs_per_day > 0 ? props.userdata.cfs_per_day - 1 : 0,
-      cfs_status: props.userdata.cfs_per_day - 1 < 3 ? true : false,
-    } as UserData);
-    const item = doc(db, "cfs-box", id);
-    await deleteDoc(item);
-    setPending(false);
-  }
 
   useEffect(() => {
     const random = Math.floor(Math.random() * animal_list.length);
@@ -261,12 +252,6 @@ export default function ManageConfession(props: ManageConfessionProps) {
           {confessionlist.map((confession) => {
             return (
               <Modal key={confession.id} data={confession}
-                function={
-                  (id: string) => {
-                    handleDelete(id);
-                  }
-                }
-                isPending={pending}
               />
             );
           })}

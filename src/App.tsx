@@ -100,6 +100,7 @@ function App() {
     cfs_per_day: number;
     cfs_status: boolean;
     role: string;
+    last_cf_time?: string;
   }
   //end type
 

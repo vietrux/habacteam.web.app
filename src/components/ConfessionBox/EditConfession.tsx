@@ -1,5 +1,5 @@
 import { User } from "firebase/auth";
-import { addDoc, collection, deleteDoc, doc, getDoc, updateDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { bad_words } from "../../Assets/bad_words";
@@ -16,6 +16,7 @@ type UserData = {
   cfs_per_day: number,
   cfs_status: boolean,
   role: string,
+  last_cf_time?: string,
 }
 type Confession = {
   id: string;
@@ -31,12 +32,11 @@ export default function EditConfession(props: EditConfessionProps) {
   useDocumentTitle("Thêm cfs");
   const [content, setContent] = useState<string>("");
   const [doc_id, setDoc_id] = useState<string>("");
+  const [last_cf_time, setLast_cf_time] = useState<string>("");
   const [signal, setSignal] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [pending, setPending] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-  const [recaptcha, setRecaptcha] = useState<boolean>(false);
-  const [showcaptcha, setShowcaptcha] = useState<boolean>(true);
   const navigate = useNavigate();
 
   //get id from url params
@@ -45,7 +45,6 @@ export default function EditConfession(props: EditConfessionProps) {
     async function getData(doc_id: string) {
       try {
         const docRef = doc(db, "cfs-box", doc_id);
-        console.log(doc_id)
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setContent(docSnap.data().content);
@@ -79,6 +78,18 @@ export default function EditConfession(props: EditConfessionProps) {
       }
     }
   }, [props.user.uid, navigate, doc_id]);
+
+  useEffect(() => {
+    const q = query(collection(db, "cfs-box"), where("uid", "==", props.user.uid || ""), orderBy("time", "desc"));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const list_confession_time = [] as string[];
+      querySnapshot.forEach((doc) => list_confession_time.push(doc.data().time));
+      setLast_cf_time(list_confession_time[0].split(",")[0].trim());
+    });
+    return () => {
+      unsubscribe();
+    }
+  }, []);
 
   async function handleAdd() {
     setPending(true);
@@ -124,6 +135,12 @@ export default function EditConfession(props: EditConfessionProps) {
     await updateDoc(doc(db, "users", props.user.uid), {
       cfs_per_day: props.userdata.cfs_per_day + 1,
       cfs_status: props.userdata.cfs_per_day + 1 < 3 ? true : false,
+      last_cf_time: new Date().toLocaleString("en-US", {
+        hour12: false,
+        day: "numeric",
+        month: "numeric",
+        year: "numeric",
+      }),
     } as UserData);
     setSignal("Đã thêm mới");
     setPending(false);
@@ -171,6 +188,7 @@ export default function EditConfession(props: EditConfessionProps) {
     await updateDoc(doc(db, "users", props.user.uid), {
       cfs_per_day: props.userdata.cfs_per_day > 0 ? props.userdata.cfs_per_day - 1 : 0,
       cfs_status: props.userdata.cfs_per_day - 1 < 3 ? true : false,
+      last_cf_time: last_cf_time,
     } as UserData);
     setPending(false);
     setSignal("Đã xóa");
@@ -185,7 +203,7 @@ export default function EditConfession(props: EditConfessionProps) {
       <div className="w-full h-screen grid grid-cols-1 place-content-center">
         <div className="px-8 sm:px-16">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl sm:text-4xl font-bold">Thêm mới</h1>
+            <h1 className="text-2xl sm:text-4xl font-bold">{doc_id ? "Chỉnh sửa " : "Thêm mới"}</h1>
             <Link to="/u/cfsbox" className="text-white bg-red-500 hover:bg-red-700 py-2 px-4 rounded-lg">
               Quay lại
             </Link>
@@ -213,7 +231,7 @@ export default function EditConfession(props: EditConfessionProps) {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  {doc_id ? "Cập nhật" : "Thêm mới"}
+                  {doc_id ? "Lưu" : "Thêm mới"}
                 </button>
                 {
                   doc_id ?
@@ -235,14 +253,14 @@ export default function EditConfession(props: EditConfessionProps) {
                       doc_id ? handleUpdate : handleAdd
                     }
                       type="button" className="inline-flex mx-2 items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition ease-in-out duration-150">
-                      {doc_id ? "Cập nhật" : "Thêm mới"}
+                      {doc_id ? "Lưu" : "Thêm mới"}
                     </button>
                     :
                     <button onClick={
                       doc_id ? handleUpdate : handleAdd
                     }
                       type="button" className="inline-flex mx-2 items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition ease-in-out duration-150 disabled:bg-indigo-300 cursor-not-allowed" disabled>
-                      {doc_id ? "Cập nhật" : "Thêm mới"}
+                      {doc_id ? "Lưu" : "Thêm mới"}
                     </button>
                 }
                 {
