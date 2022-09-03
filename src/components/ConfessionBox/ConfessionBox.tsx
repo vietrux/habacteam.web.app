@@ -66,7 +66,7 @@ function Modal(props: ModalProps) {
             setShowModal(true);
           }
         }
-          className={`text-white p-2 rounded-b-lg w-full bg-orange-800`}
+          className={`p-2 rounded-b-lg w-full bg-[#FEC89A] `}
         >Xem chi tiết</button>
       </div>
       {showModal ? (
@@ -184,18 +184,18 @@ export default function ConfessionBox(props: ConfessionBoxProps) {
         <div className="flex">
           {
             props.user.uid ?
-              <Link to="/u/cfsbox" className="w-1/3 block mx-auto py-2 bg-yellow-300 text-black text-center rounded-lg shadow-lg shadow-slate-300">
-                Quản lý CfsBox của bạn
+              <Link to="/u/cfsbox" className="w-1/3 block mx-auto py-2 bg-[#bc6cc0] text-white text-black text-center rounded-lg shadow-lg shadow-slate-300">
+                CfsBox của bạn
               </Link>
               :
-              <Link to="/g/i/cfsbox" className="w-1/3 mx-auto py-2 bg-yellow-300 text-center rounded-lg shadow-lg shadow-slate-300">
+              <Link to="/g/i/cfsbox" className="w-1/3 mx-auto py-2 bg-[#bc6cc0] text-white text-center rounded-lg shadow-lg shadow-slate-300">
                 Quy định
               </Link>
           }
           {
             props.user.uid && props.userdata.role === "admin" ?
-              <Link to="/a/cfsbox" className="w-1/3 block mx-auto py-2 bg-yellow-300 text-black text-center rounded-lg shadow-lg shadow-slate-300">
-                Quản lý toàn bộ CfsBox (Admin)
+              <Link to="/a/cfsbox" className="w-1/3 block mx-auto py-2 bg-[#bc6cc0] text-white text-black text-center rounded-lg shadow-lg shadow-slate-300">
+                Quản lý (Admin)
               </Link>
               : null
           }

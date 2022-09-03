@@ -1,6 +1,6 @@
 import axios from "axios";
 import { User } from "firebase/auth";
-import { collection, deleteDoc, doc, getDoc, onSnapshot, query, updateDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, onSnapshot, query, updateDoc, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { animal_list, color_list } from "../../Assets/zoo";
@@ -203,6 +203,7 @@ export default function ListConfession(props: ConfessionBoxProps) {
   const [confessionlist, setConfessionlist] = useState<Array<Confession>>([]);
   const [animal, setAnimal] = useState<string>("");
   const [color, setColor] = useState<string>("");
+  const [countCfs, setCountCfs] = useState<number>(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -219,6 +220,15 @@ export default function ListConfession(props: ConfessionBoxProps) {
         confessions.push(doc.data() as Confession);
       });
       setConfessionlist(confessions);
+    });
+    return () => {
+      unsubscribe();
+    }
+  }, []);
+  useEffect(() => {
+    const q = query(collection(db, "cfs-box"), where("status", "==", true));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      setCountCfs(querySnapshot.size);
     });
     return () => {
       unsubscribe();
@@ -247,7 +257,7 @@ export default function ListConfession(props: ConfessionBoxProps) {
         setPending(true);
         if (docSnap.exists()) {
           const respost = await axios.post(`https://graph.facebook.com/100670066088031/feed?access_token=${docSnap.data().access_token}`, {
-            message: content + "\n#habacconfession\n#habacteam",
+            message: `#habac_cfs+${countCfs+1}\n${content}\n#habacteam`,
           });
           updateDoc(item, {
             status: value.status,

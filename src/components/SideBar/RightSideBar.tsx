@@ -90,7 +90,7 @@ export default function RightSideBar(props: RightSideBarProps) {
       <div className={
         props.isopen ? "flex flex-col p-8 absolute top-0 left-0 bg-white sm:static w-screen sm:w-auto" : "sm:flex flex-col p-8 hidden"
       }>
-        <div className="p-8 pb-0 bg-red-300 text-lg h-full rounded-2xl shadow-2xl shadow-slate-400 my-4 hidden 2xl:block">
+        <div className="p-8 pb-0 bg-[#d8e2dc] text-lg h-full rounded-2xl shadow-2xl shadow-slate-400 my-4 hidden 2xl:block">
           <h1 className="text-xl font-bold mb-2">Mô tả:</h1>
           <p>{props.about}</p>
           <p className="text-right mt-2 italic">- HaBacTeam -</p>
@@ -101,27 +101,26 @@ export default function RightSideBar(props: RightSideBarProps) {
           </div>
           <span className="text-white font-bold">Hà Bắc Media Club</span>
         </a> */}
-        <div className=" flex bg-yellow-400 rounded-2xl shadow-2xl shadow-slate-400 p-4 py-8 text-center">
-          <img src={icon_url} alt="" className="mx-auto w-16 " />
+        <div className=" flex bg-[#f9d6fe] rounded-2xl shadow-2xl shadow-slate-400 p-4 py-8 text-center text-slate-700 justify-around">
+          <img src={icon_url} alt="" className="w-16 " />
           <div>
-            <h1 className="text-2xl font-bold mb-2 text-black">{weather?.name}</h1>
+            <h1 className="text-2xl font-bold mb-2 text-black">{localStorage.getItem("region")}</h1>
             <p className="text-lg font-bold text-black">{weather?.main?.temp} ℃</p>
           </div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-2 my-4 text-white ">
-          <a href="https://www.facebook.com/habacmediaclub" className="bg-blue-600 rounded-2xl shadow-2xl shadow-slate-400 p-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-2 my-4 text-slate-700">
+          <a href="https://www.facebook.com/habacmediaclub" className="bg-[#FCD5CE] rounded-2xl shadow-2xl shadow-slate-400 p-4 py-8">
             <p className="text-center text-lg">Số lượt thích trang</p>
             <p className="text-center text-[48px] font-bold ">{props.fan_count.hmc_fan_count}</p>
             <p className="text-center text-sm">HaBacMedia</p>
           </a>
-          <a href="https://www.facebook.com/habac.radio" className="bg-purple-900 rounded-2xl shadow-2xl shadow-slate-400 p-4 py-8">
+          <a href="https://www.facebook.com/habac.radio" className="bg-[#FAE1DD] rounded-2xl shadow-2xl shadow-slate-400 p-4 py-8">
             <p className="text-center text-lg">Số lượt thích trang</p>
             <p className="text-center text-[48px] font-bold ">{props.fan_count.hr_fan_count}</p>
             <p className="text-center text-sm">HaBacRadio</p>
           </a>
-
         </div>
-        <div className="bg-rose-900 rounded-2xl shadow-2xl shadow-slate-400 p-4 text-center text-white py-8 my-4 mb-24 sm:mb-0">
+        <div className="bg-[#FEC5BB] rounded-2xl shadow-2xl shadow-slate-400 p-4 text-center py-8 my-4 mb-24 sm:mb-0 text-slate-700">
           <h1 className="">{date_time}</h1>
           <p className="text-[32px] font-bold">{time}</p>
         </div>

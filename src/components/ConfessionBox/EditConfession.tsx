@@ -183,8 +183,7 @@ export default function EditConfession(props: EditConfessionProps) {
         Loading...
       </div>
       :
-      <div className="w-full h-full grid grid-cols-1 place-content-center">
-
+      <div className="w-full h-screen grid grid-cols-1 place-content-center">
         <div className="px-8 sm:px-16">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl sm:text-4xl font-bold">Thêm mới</h1>

@@ -69,7 +69,7 @@ function Modal(props: ModalProps) {
             setShowModal(true);
           }
         }
-          className={`text-white p-2 rounded-b-lg w-full bg-orange-800`}
+          className={`text-white p-2 rounded-b-lg w-full bg-[#606c38]`}
         >Xem chi tiết</button>
       </div>
       {showModal ? (
@@ -225,15 +225,15 @@ export default function ManageConfession(props: ManageConfessionProps) {
           </div>
         </div>
         <div className="flex w-full">
-          <Link to="/g/cfsbox" className="w-[31%] mx-auto bg-yellow-300 py-2 px-4 rounded-lg text-center shadow-lg shadow-slate-300">
+          <Link to="/g/cfsbox" className="w-[31%] mx-auto bg-[#bc6cc0] text-white py-2 px-4 rounded-lg text-center shadow-lg shadow-slate-300">
             Quay về
           </Link>
-          <Link to="/g/i/cfsbox" className="w-[31%] mx-auto py-2 bg-yellow-300 text-center rounded-lg shadow-lg shadow-slate-300">
+          <Link to="/g/i/cfsbox" className="w-[31%] mx-auto py-2 bg-[#bc6cc0] text-white text-center rounded-lg shadow-lg shadow-slate-300">
             Quy định
           </Link>
           {
             props.userdata.cfs_status ?
-              <Link to="/u/editcfs/new" className="w-[31%] mx-auto py-2 bg-yellow-300 text-black text-center rounded-lg shadow-lg shadow-slate-300">
+              <Link to="/u/editcfs/new" className="w-[31%] mx-auto py-2 bg-[#bc6cc0] text-white text-center rounded-lg shadow-lg shadow-slate-300">
                 Thêm mới
               </Link>
               :

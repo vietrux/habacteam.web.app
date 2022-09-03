@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Alegreya+Sans+SC:ital,wght@0,100;0,300;0,400;0,500;0,700;0,800;0,900;1,100;1,300;1,400;1,500;1,700;1,800;1,900&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
 /* Hide scrollbar for Chrome, Safari and Opera */
 *::-webkit-scrollbar {
   display: none;
@@ -9,8 +11,8 @@
 
 /* Hide scrollbar for IE, Edge and Firefox */
 * {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 @layer utilities {
@@ -32,12 +34,57 @@
   }
 
   /* Style the scrollbar FireFox */
-  .scrollbar{
+  .scrollbar {
     scrollbar-width: thin;
     scrollbar-color: #bebebe #f7f4ed;
   }
-  .scrollbar:hover{
+  .scrollbar:hover {
     scrollbar-color: #979797 #f7f4ed;
   }
+}
 
+@font-face {
+  font-family: "Mecuria";
+  src: url("Assets/fonts/SVN-Mercuria.otf") format("opentype");
+}
+@font-face {
+  font-family: "Cubano";
+  src: url("Assets/fonts/iCielBCCubano-Normal.otf") format("opentype");
+}
+@font-face {
+  font-family: "Matchbook";
+  src: url("Assets/fonts/iCielBCMatchbookTxture-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "CookieRun";
+  font-weight: 100;
+  src: url("Assets/fonts/SRN CookieRun Regular.otf") format("opentype");
+}
+@font-face {
+  font-family: "CookieRun";
+  font-weight: 700;
+  src: url("Assets/fonts/SRN CookieRun Bold.otf") format("opentype");
+}
+@font-face {
+  font-family: "CookieRun";
+  font-weight: 900;
+  src: url("Assets/fonts/SRN CookieRun Black.otf") format("opentype");
+}
+@font-face {
+  font-family: "Nunito";
+  font-weight: 400;
+  src: url("Assets/fonts/Nunito-Regular.ttf") format("truetype");
+}
+@layer base {
+  html {
+    font-family: "Nunito";
+    font-size: 15px;
+  }
+}
+
+:root{
+  --fa-primary-color: #f2b062;
+  --fa-primary-opacity: .7;
+  --fa-secondary-color: #a12ea6;
+  --fa-secondary-opacity: .7;
 }

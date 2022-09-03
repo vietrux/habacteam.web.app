@@ -1,5 +1,3 @@
-import { regular } from '@fortawesome/fontawesome-svg-core/import.macro';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import axios from 'axios';
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, User } from "firebase/auth";
 import { doc, getDoc, onSnapshot, setDoc } from "firebase/firestore";
@@ -111,11 +109,11 @@ function App() {
   const [hmc_about, setHmcAbout] = useState("");
   const [hmc_fan_count, setHmcFan_count] = useState(0);
   const [hmc_feed, setHmcFeed] = useState({} as FeedType);
-  const [hr_about, setHrAbout] = useState("");
   const [hr_fan_count, setHrFan_count] = useState(0);
   const [hr_feed, setHrFeed] = useState({} as FeedType);
   const [weather, setWeather] = useState({} as WeatherType);
   const [isopen, setIsopen] = useState(false);
+
 
   //end_state --------------------------------------------
 
@@ -191,7 +189,6 @@ function App() {
       const docRef = doc(db, "facebook", "hr");
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        setHrAbout(docSnap.data().about)
         setHrFan_count(docSnap.data().fan_count)
         setHrFeed(docSnap.data().feed)
       }
@@ -204,12 +201,13 @@ function App() {
   useEffect(() => {
     async function getWeather() {
       const ip_addr = await axios.get("https://api.ipify.org?format=json")
-      if (ip_addr.data.ip !== localStorage.getItem("ip_addr") || localStorage.getItem("lat") === null || localStorage.getItem("lon") === null) {
+      if (ip_addr.data.ip !== localStorage.getItem("ip_addr") || localStorage.getItem("lat") === null || localStorage.getItem("lon") === null || localStorage.getItem("region") === null) {
         localStorage.setItem("ip_addr", ip_addr.data.ip)
         const loc = await axios.get(`https://ipinfo.io/${ip_addr.data.ip}?token=d01df29be7f3b2`)
         const [lat, lon] = loc.data.loc.split(",")
         localStorage.setItem("lat", lat)
         localStorage.setItem("lon", lon)
+        localStorage.setItem("region", loc.data.region)
       }
       const lat = localStorage.getItem("lat")
       const lon = localStorage.getItem("lon")
@@ -228,52 +226,55 @@ function App() {
           <div className='mx-auto text-center w-full sm:hidden bg-white rounded-2xl shadow-xl shadow-gray-200 p-4 fixed top-0'>
             <img src={Logo} alt="logo" className="w-1/6 h-auto mx-auto " />
           </div>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/hmc" element={<HMC feed={hmc_feed} />} />
-            <Route path="/hr" element={<HR feed={hr_feed} />} />
-            <Route path="/u/">
-              <Route path="register" element={
-                <div className="w-full h-screen grid content-center text-center px-4 bg-white">
-                  Xin lỗi, đã hết đợt đăng ký. Vui lòng quay lại sau.
-                </div>
-              } />
-              <Route path="total" element={<ListAnswer />} />
-              <Route path="cfsbox" element={<ManageConfession user={user} userdata={userdata} isSignIn={
-                (value: boolean) => {
-                  handleSign(value)
-                }
-              } />} />
-              <Route path="editcfs/:id" element={<EditConfession user={user} userdata={userdata} isSignIn={
-                (value: boolean) => {
-                  handleSign(value)
-                }
-              } />} />
-            </Route>
-            <Route path='/g/'>
-              <Route path="i/">
-                <Route path="departments" element={<Departments />} />
-                <Route path="cfsbox" element={<CfsBoxRule />} />
+          <div className='bg-[url(hhttps://cdn141.picsart.com/329085352011201.jpg?to=crop&type=webp&r=1456x1930&q=85)]'>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/u/">
+                <Route path="register" element={
+                  <div className="w-full h-screen grid content-center text-center px-4 bg-white">
+                    Xin lỗi, đã hết đợt đăng ký. Vui lòng quay lại sau.
+                  </div>
+                } />
+                <Route path="total" element={<ListAnswer />} />
+                <Route path="cfsbox" element={<ManageConfession user={user} userdata={userdata} isSignIn={
+                  (value: boolean) => {
+                    handleSign(value)
+                  }
+                } />} />
+                <Route path="editcfs/:id" element={<EditConfession user={user} userdata={userdata} isSignIn={
+                  (value: boolean) => {
+                    handleSign(value)
+                  }
+                } />} />
               </Route>
-              <Route path="cfsbox" element={<ConfessionBox user={user} userdata={userdata} isSignIn={
-                (value: boolean) => {
-                  handleSign(value)
-                }
-              } />} />
-            </Route>
-            <Route path='/a/'>
-              <Route path="cfsbox" element={<ListConfession user={user} userdata={userdata} isSignIn={
-                (value: boolean) => {
-                  handleSign(value)
-                }
-              } />} />
-            </Route>
-            <Route path='*' element={<NoPage />} />
-          </Routes>
+              <Route path='/g/'>
+
+                <Route path="i/">
+                  <Route path="departments" element={<Departments />} />
+                  <Route path="cfsbox" element={<CfsBoxRule />} />
+                </Route>
+                <Route path="hmc" element={<HMC feed={hmc_feed} />} />
+                <Route path="hr" element={<HR feed={hr_feed} />} />
+                <Route path="cfsbox" element={<ConfessionBox user={user} userdata={userdata} isSignIn={
+                  (value: boolean) => {
+                    handleSign(value)
+                  }
+                } />} />
+              </Route>
+              <Route path='/a/'>
+                <Route path="cfsbox" element={<ListConfession user={user} userdata={userdata} isSignIn={
+                  (value: boolean) => {
+                    handleSign(value)
+                  }
+                } />} />
+              </Route>
+              <Route path='*' element={<NoPage />} />
+            </Routes>
+          </div>
         </div>
-        <RightSideBar weather={weather} about={hmc_about} fan_count={{hmc_fan_count,hr_fan_count}} isopen={isopen} />
+        <RightSideBar weather={weather} about={hmc_about} fan_count={{ hmc_fan_count, hr_fan_count }} isopen={isopen} />
         <div className="fixed inset-x-0 bottom-0 z-10 bg-white shadow-2xl shadow-slate-500 block sm:hidden rounded-lg">
-          <div className="px-4 sm:p-6 flex justify-around">
+          <div className="px-4 sm:p-6 grid grid-cols-5">
             <Link to="/" onClick={
               () => {
                 setIsopen(false)
@@ -282,7 +283,7 @@ function App() {
               <i className="fa-regular fa-house fa-lg"></i>
               <p className="text-[12px] font-normal">Trang chủ</p>
             </Link>
-            <Link to="/hmc" onClick={
+            <Link to="/g/hmc" onClick={
               () => {
                 setIsopen(false)
               }
@@ -290,7 +291,7 @@ function App() {
               <i className="fa-regular fa-photo-film-music"></i>
               <p className="text-[12px] font-normal">Hmc</p>
             </Link>
-            <Link to="/hr" onClick={
+            <Link to="/g/hr" onClick={
               () => {
                 setIsopen(false)
               }
@@ -304,14 +305,14 @@ function App() {
               }
             } className="my-2 p-2 text-slate-600 hover:text-green-900 font-semibold text-center">
               <i className="fa-regular fa-messages fa-lg"></i>
-              <p className="text-[12px] font-normal">Confession Box</p>
+              <p className="text-[12px] font-normal">Cfs Box</p>
             </Link>
             <button onClick={
               () => {
                 setIsopen(!isopen)
               }
             } className="my-2 p-2 text-slate-600 hover:text-green-900 font-semibold text-center">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width={"20px"} className="mx-auto fill-slate-600"><path d="M0 80C0 53.49 21.49 32 48 32H144C170.5 32 192 53.49 192 80V176C192 202.5 170.5 224 144 224H48C21.49 224 0 202.5 0 176V80zM48 176H144V80H48V176zM0 336C0 309.5 21.49 288 48 288H144C170.5 288 192 309.5 192 336V432C192 458.5 170.5 480 144 480H48C21.49 480 0 458.5 0 432V336zM48 432H144V336H48V432zM400 32C426.5 32 448 53.49 448 80V176C448 202.5 426.5 224 400 224H304C277.5 224 256 202.5 256 176V80C256 53.49 277.5 32 304 32H400zM400 80H304V176H400V80zM256 336C256 309.5 277.5 288 304 288H400C426.5 288 448 309.5 448 336V432C448 458.5 426.5 480 400 480H304C277.5 480 256 458.5 256 432V336zM304 432H400V336H304V432z" /></svg>
+              <i className="fa-regular fa-grid-2 fa-lg"></i>
               <p className="text-[12px] font-normal">Khác</p>
             </button>
           </div>

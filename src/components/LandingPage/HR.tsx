@@ -28,7 +28,7 @@ type HRProps = {
 }
 
 export default function HR(props: HRProps) {
-  useDocumentTitle("Trang chủ");
+  useDocumentTitle("HaBacRadio");
   return (
     <>
       <div className="overflow-y-auto h-screen ">
@@ -39,7 +39,6 @@ export default function HR(props: HRProps) {
         <div className="mx-12 mb-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 sm:mt-12">
           {
             props.feed.data ? props.feed.data.map((item: any, index: number) => {
-              console.log(item);
               return (
                 <div className=" rounded-2xl shadow-xl shadow-gray-400" key={item.id}>
                   {
@@ -53,7 +52,7 @@ export default function HR(props: HRProps) {
                           <img src="https://scontent.fhph3-1.fna.fbcdn.net/v/t1.6435-9/117528837_1974857756014484_7403788458473311156_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=N2kktbmVaboAX80hbsD&tn=IuAfZkdr7Ov_oScf&_nc_ht=scontent.fhph3-1.fna&oh=00_AT8QB6X2GnWBtPJ1etmTYY2JnVUUpESlCAZ8FPiGAl0ekQ&oe=6329AA38" alt="" className="rounded-t-2xl object-cover w-full aspect-square" />
                       )
                   }
-                  <div className="p-2">
+                  <div className="p-2 bg-[#fffef1]">
                     <p className="text-sm my-2">{item.created_time}</p>
                     <p style={
                       {
@@ -76,7 +75,7 @@ export default function HR(props: HRProps) {
                       <span className="text-black"> {item.reactions.summary.total_count}</span>
                     </div>
                   </div>
-                  <a href={item.permalink_url} className="w-full bg-pink-800 text-white block py-4 rounded-b-2xl text-center text-lg">Xem bài viết</a>
+                  <a href={item.permalink_url} className="w-full bg-[#FEC89A] block py-2 rounded-b-2xl text-center">Xem bài viết</a>
                 </div>
               )
             })
