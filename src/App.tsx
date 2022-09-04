@@ -204,11 +204,17 @@ function App() {
       const ip_addr = await axios.get("https://api.ipify.org?format=json")
       if (ip_addr.data.ip !== localStorage.getItem("ip_addr") || localStorage.getItem("lat") === null || localStorage.getItem("lon") === null || localStorage.getItem("region") === null) {
         localStorage.setItem("ip_addr", ip_addr.data.ip)
-        const loc = await axios.get(`https://ipinfo.io/${ip_addr.data.ip}?token=d01df29be7f3b2`)
-        const [lat, lon] = loc.data.loc.split(",")
-        localStorage.setItem("lat", lat)
-        localStorage.setItem("lon", lon)
-        localStorage.setItem("region", loc.data.region)
+        try {
+          const loc = await axios.get(`https://ipinfo.io/${ip_addr.data.ip}?token=d01df29be7f3b2`)
+          const [lat, lon] = loc.data.loc.split(",")
+          localStorage.setItem("lat", lat)
+          localStorage.setItem("lon", lon)
+          localStorage.setItem("region", loc.data.region)
+        } catch (e) {
+          localStorage.setItem("lat", "21.0313")
+          localStorage.setItem("lon", "105.8516")
+          localStorage.setItem("region", "Hà Nội")
+        }
       }
       const lat = localStorage.getItem("lat")
       const lon = localStorage.getItem("lon")
