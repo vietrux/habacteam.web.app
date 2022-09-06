@@ -188,12 +188,12 @@ export default function ConfessionBox(props: ConfessionBoxProps) {
                 <Link to="/u/cfsbox" className="w-1/3 block mx-auto py-2 bg-[#bc6cc0] text-white text-center rounded-lg shadow-lg shadow-slate-300">
                   CfsBox của bạn
                 </Link>
-                {
+                (
                   props.userdata.role !== "admin" ?
                     <Link to="/g/i/cfsbox" className="w-1/3 mx-auto py-2 bg-[#bc6cc0] text-white text-center rounded-lg shadow-lg shadow-slate-300">
                       Quy định
                     </Link>
-                }
+                )
               </>
               :
               <Link to="/g/i/cfsbox" className="w-1/3 mx-auto py-2 bg-[#bc6cc0] text-white text-center rounded-lg shadow-lg shadow-slate-300">
