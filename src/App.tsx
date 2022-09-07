@@ -227,51 +227,50 @@ function App() {
           <div className='mx-auto text-center w-full sm:hidden bg-white rounded-2xl shadow-xl shadow-gray-200 p-4 fixed top-0'>
             <img src={Logo} alt="logo" className="w-1/6 h-auto mx-auto " />
           </div>
-          <div className='bg-[url(hhttps://cdn141.picsart.com/329085352011201.jpg?to=crop&type=webp&r=1456x1930&q=85)]'>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/u/">
-                <Route path="register" element={
-                  <div className="w-full h-screen grid content-center text-center px-4 bg-white">
-                    Xin lỗi, đã hết đợt đăng ký. Vui lòng quay lại sau.
-                  </div>
-                } />
-                <Route path="total" element={<ListAnswer />} />
-                <Route path="cfsbox" element={<ManageConfession user={user} userdata={userdata} isSignIn={
-                  (value: boolean) => {
-                    handleSign(value)
-                  }
-                } />} />
-                <Route path="editcfs/:id" element={<EditConfession user={user} userdata={userdata} isSignIn={
-                  (value: boolean) => {
-                    handleSign(value)
-                  }
-                } />} />
-              </Route>
-              <Route path='/g/'>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/u/">
+              <Route path="register" element={
+                <div className="w-full h-screen grid content-center text-center px-4 bg-white">
+                  Xin lỗi, đã hết đợt đăng ký. Vui lòng quay lại sau.
+                </div>
+              } />
+              <Route path="total" element={<ListAnswer />} />
+              <Route path="cfsbox" element={<ManageConfession user={user} userdata={userdata} isSignIn={
+                (value: boolean) => {
+                  handleSign(value)
+                }
+              } />} />
+              <Route path="editcfs/:id" element={<EditConfession user={user} userdata={userdata} isSignIn={
+                (value: boolean) => {
+                  handleSign(value)
+                }
+              } />} />
+            </Route>
+            <Route path='/g/'>
 
-                <Route path="i/">
-                  <Route path="departments" element={<Departments />} />
-                  <Route path="cfsbox" element={<CfsBoxRule />} />
-                </Route>
-                <Route path="hmc" element={<HMC feed={hmc_feed} />} />
-                <Route path="hr" element={<HR feed={hr_feed} />} />
-                <Route path="cfsbox" element={<ConfessionBox user={user} userdata={userdata} isSignIn={
-                  (value: boolean) => {
-                    handleSign(value)
-                  }
-                } />} />
+              <Route path="i/">
+                <Route path="departments" element={<Departments />} />
+                <Route path="cfsbox" element={<CfsBoxRule />} />
               </Route>
-              <Route path='/a/'>
-                <Route path="cfsbox" element={<ListConfession user={user} userdata={userdata} isSignIn={
-                  (value: boolean) => {
-                    handleSign(value)
-                  }
-                } />} />
-              </Route>
-              <Route path='*' element={<NoPage />} />
-            </Routes>
-          </div>
+              <Route path="hmc" element={<HMC feed={hmc_feed} />} />
+              <Route path="hr" element={<HR feed={hr_feed} />} />
+              <Route path="cfsbox" element={<ConfessionBox user={user} userdata={userdata} isSignIn={
+                (value: boolean) => {
+                  handleSign(value)
+                }
+              } />} />
+            </Route>
+            <Route path='/a/'>
+              <Route path="cfsbox" element={<ListConfession user={user} userdata={userdata} isSignIn={
+                (value: boolean) => {
+                  handleSign(value)
+                }
+              } />} />
+            </Route>
+            <Route path='*' element={<NoPage />} />
+          </Routes>
+
         </div>
         <RightSideBar weather={weather} about={hmc_about} fan_count={{ hmc_fan_count, hr_fan_count }} isopen={isopen} />
         <div className="fixed inset-x-0 bottom-0 z-10 bg-white shadow-2xl shadow-slate-500 block sm:hidden rounded-lg">

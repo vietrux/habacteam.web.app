@@ -183,27 +183,31 @@ export default function ConfessionBox(props: ConfessionBoxProps) {
         </div>
         <div className="flex">
           {
-            props.user.uid && props.userdata.role !== "admin" ?
+            props.user.uid ?
               <>
                 <Link to="/u/cfsbox" className="w-1/3 block mx-auto py-2 bg-[#bc6cc0] text-white text-center rounded-lg shadow-lg shadow-slate-300">
                   CfsBox của bạn
                 </Link>
-                <Link to="/g/i/cfsbox" className="w-1/3 mx-auto py-2 bg-[#bc6cc0] text-white text-center rounded-lg shadow-lg shadow-slate-300">
-                  Quy định
-                </Link>
               </>
-
               :
               <Link to="/g/i/cfsbox" className="w-1/3 mx-auto py-2 bg-[#bc6cc0] text-white text-center rounded-lg shadow-lg shadow-slate-300">
                 Quy định
               </Link>
           }
+
+
           {
-            props.user.uid && props.userdata.role === "admin" ?
+            props.userdata.role === "admin" ?
               <Link to="/a/cfsbox" className="w-1/3 block mx-auto py-2 bg-[#bc6cc0] text-white text-center rounded-lg shadow-lg shadow-slate-300">
                 Quản lý
               </Link>
-              : null
+              :
+              props.user.uid ?
+                <Link to="/g/i/cfsbox" className="w-1/3 mx-auto py-2 bg-[#bc6cc0] text-white text-center rounded-lg shadow-lg shadow-slate-300">
+                  Quy định
+                </Link>
+                :
+                <></>
           }
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto p-6 mb-16">

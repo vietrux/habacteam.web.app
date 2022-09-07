@@ -47,9 +47,9 @@ export default function HMC(props: HMCProps) {
                       :
                       (
                         item.full_picture ?
-                          <img src={item.full_picture} alt="" className="rounded-t-2xl object-cover w-full aspect-square" />
+                          <img src={item.full_picture} alt="thumnail" className="rounded-t-2xl object-cover w-full aspect-square" />
                       :
-                          <img src="https://scontent.fhph3-1.fna.fbcdn.net/v/t1.6435-9/117528837_1974857756014484_7403788458473311156_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=N2kktbmVaboAX80hbsD&tn=IuAfZkdr7Ov_oScf&_nc_ht=scontent.fhph3-1.fna&oh=00_AT8QB6X2GnWBtPJ1etmTYY2JnVUUpESlCAZ8FPiGAl0ekQ&oe=6329AA38" alt="" className="rounded-t-2xl object-cover w-full aspect-square" />
+                          <img src="https://picsum.photos/500" alt="thumnail" className="rounded-t-2xl object-cover w-full aspect-square" />
                       )
                   }
                   <div className="p-2 bg-[#fffef1]">
