@@ -1,6 +1,6 @@
 import axios from "axios";
 import { User } from "firebase/auth";
-import { collection, deleteDoc, doc, getDoc, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, onSnapshot, query, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { animal_list, color_list } from "../../Assets/zoo";
@@ -215,22 +215,19 @@ export default function ListConfession(props: ConfessionBoxProps) {
   }, [props.user.uid, navigate]);
 
   useEffect(() => {
-    const q = query(collection(db, "cfs-box"), orderBy("time", "desc"));
+    const q = query(collection(db, "cfs-box"));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const confessions = [] as Array<Confession>;
       querySnapshot.forEach((doc) => {
         confessions.push(doc.data() as Confession);
+      });      
+      //sort by time to Date.valueOf()
+      confessions.sort((a, b) => {
+        return new Date(b.time).valueOf() - new Date(a.time).valueOf();
       });
       setConfessionlist(confessions);
-    });
-    return () => {
-      unsubscribe();
-    }
-  }, []);
-  useEffect(() => {
-    const q = query(collection(db, "cfs-box"), where("status", "==", true));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      setCountCfs(querySnapshot.size);
+      const count = confessions.filter((cfs) => cfs.status === false).length;
+      setCountCfs(count);
     });
     return () => {
       unsubscribe();

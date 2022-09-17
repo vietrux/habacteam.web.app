@@ -212,7 +212,7 @@ function App() {
       }
       const lat = localStorage.getItem("lat")
       const lon = localStorage.getItem("lon")
-      const weather = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=62841c9fd78f4f0c1a6cc542345b7c5d`)
+      const weather = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=ccf21d971fb90f3441fc5f067d765217`)
       setWeather(weather.data)
     }
     getWeather()
