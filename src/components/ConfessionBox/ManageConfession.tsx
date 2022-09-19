@@ -132,7 +132,7 @@ export default function ManageConfession(props: ManageConfessionProps) {
   const [confessionlist, setConfessionlist] = useState<Array<Confession>>([]);
 
   useEffect(() => {
-    async function update_cfs_per_day(){
+    async function update_cfs_per_day() {
       await updateDoc(doc(db, "users", props.user.uid), {
         cfs_per_day: 0,
         cfs_status: true,
@@ -145,6 +145,9 @@ export default function ManageConfession(props: ManageConfessionProps) {
       year: "numeric",
     });
     if (props.userdata.last_cf_time !== datenow) {
+      update_cfs_per_day();
+    }
+    if (props.userdata.role === "admin" && props.userdata.cfs_per_day > 0) {
       update_cfs_per_day();
     }
   }, []);
