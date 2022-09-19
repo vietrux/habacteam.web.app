@@ -226,7 +226,7 @@ export default function ListConfession(props: ConfessionBoxProps) {
         return new Date(b.time).valueOf() - new Date(a.time).valueOf();
       });
       setConfessionlist(confessions);
-      const count = confessions.filter((cfs) => cfs.status === false).length;
+      const count = confessions.filter((cfs) => cfs.status === true).length;
       setCountCfs(count);
     });
     return () => {
