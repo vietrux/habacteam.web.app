@@ -107,7 +107,13 @@ function Modal(props: ModalProps) {
   return (
     <>
       <div className="rounded-lg shadow-2xl shadow-slate-400">
-        <div className={`text-sm text-black p-2 rounded-t-lg flex justify-between bg-slate-100`}>
+        <div className={
+          props.data.errormessage ? 
+          `text-sm text-black p-2 rounded-t-lg flex justify-between bg-red-500`
+          : 
+          `text-sm text-black p-2 rounded-t-lg flex justify-between bg-slate-100`
+          
+          }>
           <p>{props.data.time}</p>
           <p>{props.data.errormessage ? "Vi phạm" : props.data.status ? "Đã xác nhận" : "Chưa xác nhận"}</p>
         </div>
@@ -129,7 +135,7 @@ function Modal(props: ModalProps) {
             setShowModal(true);
           }
         }
-          className={props.data.errormessage ? "bg-[#606c38] text-white p-2 rounded-b-lg w-full" : props.data.status ? "bg-[#FEC89A] p-2 rounded-b-lg w-full" : "bg-[#606c38] text-white p-2 rounded-b-lg w-full"}
+          className={props.data.status ? "bg-[#FEC89A] p-2 rounded-b-lg w-full" : "bg-[#606c38] text-white p-2 rounded-b-lg w-full"}
         >Xem chi tiết</button>
       </div>
       {

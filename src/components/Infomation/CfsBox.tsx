@@ -14,7 +14,7 @@ export default function CfsBoxRule() {
           - Thông tin của các bạn được ẩn danh tuyệt đối (kể cả Ad cũng không biết bạn là ai).<br />
           - Mỗi bạn chỉ được confess 3 lần/ngày và không giới hạn số lần xóa đi viết lại.<br />
           - Chúng tớ sẽ duyệt bài vào 11h45-12h45 và 19h45-21h45<br />
-          - Confession sẽ bị xóa nếu Vi phạm những điều ở mục 2<br />
+          - Confession sẽ bị đánh dấu là vi phạm và bị xóa nếu Vi phạm những điều ở mục 2<br />
 
           <p className="text-lg font-semibold text-center pb-2 pt-4">2. Những nội dung sẽ KHÔNG ĐƯỢC ĐĂNG (Vi phạm):</p>
           - Dùng từ tục tĩu, nội dung không lành mạnh, teencode, viết tắt nhiều. (đọc không nổi) <span className="font-bold">(***)</span><br />
