@@ -126,6 +126,9 @@ export default function ConfessionBox(props: ConfessionBoxProps) {
       querySnapshot.forEach((doc) => {
         confessions.push(doc.data() as Confession);
       });
+      confessions.sort((a, b) => {
+        return new Date(b.time).valueOf() - new Date(a.time).valueOf();
+      });
       setConfessionlist(confessions as Array<Confession>);
     });
     return () => {

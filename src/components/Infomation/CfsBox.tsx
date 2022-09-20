@@ -22,7 +22,7 @@ export default function CfsBoxRule() {
           - Bịa đặt, tung tin đồn nhảm, sai sự thật, nội dung xúc phạm, chửi bới hoặc nói xấu người khác.<br />
           - Chứa nội dung quảng cáo, tiếp thị...<br />
           - Nội dung đã từng được đăng trước đó.<br />
-          - Nội dung quá ngắn và không có ý nghĩa hoặc không phải là confession<br />
+          - Nội dung quá ngắn và không có ý nghĩa<br />
 
           <span className="italic font-bold">Mục (***). sẽ được hệ thống check trực tiếp khi các bạn thực hiện confess</span>
 

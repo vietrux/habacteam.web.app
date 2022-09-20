@@ -46,7 +46,10 @@ function Modal(props: ModalProps) {
   return (
     <>
       <div className="rounded-lg shadow-2xl shadow-slate-400">
-        <div className={`text-sm text-black p-2 rounded-t-lg flex justify-between bg-slate-100`}>
+        <div className={
+          props.data.errormessage ? `text-sm text-black p-2 rounded-t-lg flex justify-between bg-red-500` : 
+          `text-sm text-black p-2 rounded-t-lg flex justify-between bg-slate-100`
+          }>
           <p>{props.data.time}</p>
           <p>{props.data.errormessage ? "Vi phạm" : props.data.status ? "Đã xác nhận" : "Chưa xác nhận"}</p>
         </div>
@@ -85,7 +88,7 @@ function Modal(props: ModalProps) {
                     {props.data.errormessage ? "Vi phạm" : props.data.status ? "Đã xác nhận" : "Chưa xác nhận"}
                   </h3>
                   {
-                    props.data.status ?
+                    props.data.status || props.data.errormessage ?
                       null :
                       <Link to={`/u/editcfs/${props.data.id}`}
                         className="text-xl font-semibold">Chỉnh sửa</Link>
@@ -94,7 +97,11 @@ function Modal(props: ModalProps) {
                 {/*body*/}
                 <div className="relative p-3 flex-auto">
                   <p style={{ whiteSpace: "pre-line" }} className="h-36 my-1 text-slate-900 text-lg leading-relaxed overflow-y-auto scrollbar">
-                    {props.data.content}
+                    {
+                      props.data.errormessage ?
+                        props.data.content + `\n Lý do: ${props.data.errormessage}` :
+                        props.data.content
+                    }
                   </p>
                 </div>
                 {/*footer*/}
@@ -158,6 +165,9 @@ export default function ManageConfession(props: ManageConfessionProps) {
       const confessions = [] as Array<Confession>;
       querySnapshot.forEach((doc) => {
         confessions.push(doc.data() as Confession);
+      });
+      confessions.sort((a, b) => {
+        return new Date(b.time).valueOf() - new Date(a.time).valueOf();
       });
       setConfessionlist(confessions);
     });
@@ -240,7 +250,7 @@ export default function ManageConfession(props: ManageConfessionProps) {
               <div className="grid grid-cols-1 grid-row-3 place-content-center w-full h-full rounded-lg shadow-2xl shadow-slate-400 p-4">
                 <p className="text-center">Bạn còn lại:</p>
                 <p className="text-2xl font-bold text-center">{3 - props.userdata.cfs_per_day}</p>
-                <p className="text-center">Lượt thêm mới</p>
+                <p className="text-center">Lượt thêm mới trong hôm nay</p>
               </div> :
               <div className="grid grid-cols-1 grid-row-3 place-content-center w-full h-full rounded-lg shadow-2xl shadow-slate-400 p-4">
                 <p className="text-center">Bạn đã hết lượt thêm mới</p>
